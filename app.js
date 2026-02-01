@@ -77,7 +77,6 @@ window.switchTab = (element, pageId) => {
 document.addEventListener("DOMContentLoaded", () => {
     const activeBtn = document.querySelector('.nav-item.active'); 
     if(activeBtn) setTimeout(() => window.switchTab(activeBtn, null), 100); 
-    // Initial Render for Guests
     renderCourses(null);
 });
 
@@ -100,7 +99,6 @@ onAuthStateChanged(auth, async (user) => {
     const loginView = document.getElementById('loginContent');
     const profileView = document.getElementById('profileContent');
 
-    // 1. Re-Render Courses based on new Auth State
     await renderCourses(user);
 
     if (user) {
@@ -117,8 +115,13 @@ onAuthStateChanged(auth, async (user) => {
             document.getElementById('userEmail').innerText = user.email;
         }
 
-        // 2. Load History
-        await loadHistory(user);
+        // Load History (With Error Handling)
+        try {
+            await loadHistory(user);
+        } catch (e) {
+            console.error("History load failed:", e);
+            document.getElementById('historyList').innerHTML = "<p style='color:red; font-size:0.8rem;'>Error loading history.</p>";
+        }
 
         await checkAndCreateProfile(user);
     } else {
@@ -181,7 +184,6 @@ async function renderCourses(user) {
         div.className = 'course-card';
         const featuresHtml = c.features.map(f => `<li><i class="fas fa-check-circle"></i> ${f}</li>`).join('');
         
-        // Button Logic
         let actionButton = "";
         
         if (c.price === 0) {
@@ -254,11 +256,12 @@ window.playVideo = (id, title, el) => {
     saveHistory(id, title);
 };
 
-// --- HISTORY FUNCTIONS ---
+// --- PREMIUM HISTORY LOGIC (Fixed "Stuck on Loading") ---
 async function saveHistory(videoId, title) {
     const user = auth.currentUser;
     if(!user) return;
     
+    // Save to Firestore
     const historyRef = doc(db, "users", user.uid, "watchHistory", videoId);
     try {
         await setDoc(historyRef, {
@@ -266,7 +269,8 @@ async function saveHistory(videoId, title) {
             title: title,
             timestamp: serverTimestamp()
         });
-        loadHistory(user); // Reload list
+        // Reload list instantly
+        loadHistory(user);
     } catch(e) { console.log("History save error", e); }
 }
 
@@ -274,25 +278,53 @@ async function loadHistory(user) {
     const list = document.getElementById('historyList');
     if(!list) return;
 
+    // We remove 'orderBy' from the query to prevent "Missing Index" errors
+    // Instead, we sort the data in JavaScript
     const q = query(
         collection(db, "users", user.uid, "watchHistory"), 
-        orderBy("timestamp", "desc"), 
-        limit(5)
+        limit(10) 
     );
     
     const snapshot = await getDocs(q);
     list.innerHTML = ""; 
     
     if(snapshot.empty) {
-        list.innerHTML = "<p style='color:#666; font-size:0.8rem; font-style:italic;'>No classes watched yet.</p>";
+        list.innerHTML = "<p style='color:#666; font-size:0.8rem; font-style:italic; padding:10px;'>No classes watched yet.</p>";
         return;
     }
 
+    // Convert to array and Sort by Timestamp manually (Newest first)
+    const historyItems = [];
     snapshot.forEach(doc => {
-        const data = doc.data();
+        historyItems.push(doc.data());
+    });
+    
+    historyItems.sort((a, b) => {
+        // Safe check for null timestamps (can happen immediately after write)
+        const timeA = a.timestamp ? a.timestamp.seconds : Date.now()/1000;
+        const timeB = b.timestamp ? b.timestamp.seconds : Date.now()/1000;
+        return timeB - timeA;
+    });
+
+    // Render Cards
+    historyItems.forEach(data => {
         const div = document.createElement('div');
-        div.className = 'history-item';
-        div.innerHTML = `<i class="fas fa-play-circle"></i> <span>${data.title}</span>`;
+        div.className = 'history-card';
+        // Use YouTube Thumbnail API
+        const thumbUrl = `https://img.youtube.com/vi/${data.videoId}/mqdefault.jpg`;
+        
+        div.innerHTML = `
+            <div style="position:relative;">
+                <img src="${thumbUrl}" class="history-thumb" alt="thumb">
+                <i class="fas fa-play play-overlay"></i>
+            </div>
+            <div class="history-info">
+                <div class="history-title">${data.title}</div>
+                <div class="history-meta">
+                    <i class="fas fa-check-circle" style="color:var(--accent-gold)"></i> Watched
+                </div>
+            </div>
+        `;
         div.onclick = () => {
             closeAuthModal();
             findAndPlayVideo(data.videoId);

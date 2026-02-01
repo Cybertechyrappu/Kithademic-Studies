@@ -77,7 +77,7 @@ window.closeAuthModal = () => {
     // Find the Home button (first nav item)
     const homeBtn = document.querySelector('.nav-item'); 
     if(homeBtn) {
-        // Move bubble back to home without changing page content
+        // Move bubble back to home
         window.switchTab(homeBtn, null); 
     }
 };
@@ -90,18 +90,16 @@ window.toggleAuthMode = () => {
 
 // --- BUBBLE ANIMATION ---
 window.switchTab = (element, pageId) => {
-    // 1. Switch Page Content (if pageId is provided)
     if(pageId) showPage(pageId);
 
-    // 2. Handle Bubble Animation
     const bubble = document.getElementById('navBubble');
     
-    // Move Bubble to match the clicked element
+    // Calculate Position
     bubble.style.width = `${element.offsetWidth}px`;
     bubble.style.transform = `translateX(${element.offsetLeft}px)`;
     bubble.classList.add('initialized'); 
 
-    // 3. Update Active State
+    // Update Active State
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     element.classList.add('active');
 };
@@ -145,6 +143,7 @@ window.handleGoogleAuth = async () => {
     }
 };
 
+// --- AUTH LISTENER & PROFILE SWITCHING ---
 onAuthStateChanged(auth, async (user) => {
     const navIconDiv = document.getElementById('navAuthIcon');
     const label = document.getElementById('authLabel');
@@ -180,10 +179,15 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-window.signOut = (authInstance) => {
-    signOut(authInstance).then(() => {
-        closeAuthModal(); // This will triggers the bubble reset
+// --- FIX: GLOBAL SIGN OUT FUNCTION ---
+window.handleSignOut = () => {
+    signOut(auth).then(() => {
+        closeAuthModal();
         alert("Logged Out Successfully");
+        // Force reload to reset state cleanly
+        window.location.reload();
+    }).catch((error) => {
+        alert("Error: " + error.message);
     });
 };
 

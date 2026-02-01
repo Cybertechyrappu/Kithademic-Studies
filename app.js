@@ -25,9 +25,6 @@ const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 const adminPhone = "919526755210"; 
 
-// Player Variable
-let player = null;
-
 // ==========================================
 // 2. DATA
 // ==========================================
@@ -180,7 +177,7 @@ window.buyCourse = (courseId) => {
 };
 
 // ==========================================
-// 6. CLASSROOM & PLAYER LOGIC (FIXED)
+// 6. CLASSROOM & PLAYER (ORIGINAL IFRAME)
 // ==========================================
 window.openCourse = async (courseId) => {
     if (!auth.currentUser) { alert("Login first."); openAuthModal(); return; }
@@ -198,20 +195,7 @@ window.openCourse = async (courseId) => {
     const lessons = courseContent[courseId];
     if (!lessons) return alert("Coming Soon.");
 
-    // 1. Show the page FIRST
     showPage('classroom');
-
-    // 2. Initialize Player NOW (Since element is visible)
-    if (!player) {
-        try {
-            player = new Plyr('#player', {
-                controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'],
-                youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
-            });
-        } catch(e) { console.log("Player init error", e); }
-    }
-
-    // 3. Load Playlist
     const pl = document.getElementById('playlistItems');
     pl.innerHTML = "";
     lessons.forEach((l, i) => {
@@ -222,18 +206,13 @@ window.openCourse = async (courseId) => {
         pl.appendChild(d);
     });
     
-    // 4. Play First Video
+    // Play First Video
     if(lessons.length) window.playVideo(lessons[0].videoId, lessons[0].title, pl.firstChild);
 };
 
 window.playVideo = (id, title, el) => {
-    // Switch Source
-    if(player) {
-        player.source = {
-            type: 'video',
-            sources: [{ src: id, provider: 'youtube' }],
-        };
-    }
+    // Standard YouTube Embed Update
+    document.getElementById('mainPlayer').src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`;
     
     document.getElementById('videoTitle').innerText = title;
     document.querySelectorAll('.lesson-item').forEach(x => x.classList.remove('active'));

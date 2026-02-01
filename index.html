@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kithademic Studies</title>
+    <link rel="manifest" href="manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
@@ -12,7 +13,7 @@
 
     <div class="top-brand">
         <div class="logo">
-            <i class="fas fa-book-quran"></i>
+            <i class="fas fa-book-quran"></i> Kithademic
         </div>
         <button class="admin-btn-top" onclick="openAdminCheck()">
             <i class="fas fa-user-shield"></i>
@@ -33,7 +34,7 @@
         </section>
 
         <section id="courses" class="page hidden">
-            <h2 class="section-title"><span class="gold-text1">Premium Courses</span></h2>
+            <h2 class="section-title"><span class="gold-text">Premium Courses</span></h2>
             <div class="course-grid" id="courseList"></div>
         </section>
 
@@ -61,7 +62,7 @@
             <h2>Admin Dashboard</h2>
             <div class="modal-content">
                 <input type="text" id="studentId" placeholder="Paste User UID here">
-                <button class="btn-primary" onclick="addMonth()">Add 30 Days Access</button>
+                <button class="btn-primary" onclick="addMonth()">Add 90 Days Access</button>
                 <p id="adminStatus" style="margin-top:10px; color:var(--accent-gold);"></p>
             </div>
         </section>
@@ -98,7 +99,12 @@
                 <img id="userProfileImg" src="" alt="Profile" class="big-profile-img">
                 <h2 id="userName" class="gold-text">Student Name</h2>
                 <p id="userEmail" style="color:#aaa; margin-bottom:20px;">student@gmail.com</p>
-                <div class="profile-actions">
+                
+                <div class="profile-actions" style="display:flex; flex-direction:column; gap:10px;">
+                    <button id="installBtn" class="btn-primary" onclick="installApp()" style="display:none; border-color:var(--accent-gold); color:var(--accent-gold);">
+                        <i class="fas fa-download"></i> Install App
+                    </button>
+
                     <button class="btn-primary" onclick="handleSignOut()" style="width:100%; border-color:#ff4444; color:#ff4444;">Log Out</button>
                 </div>
             </div>

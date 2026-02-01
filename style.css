@@ -1,308 +1,305 @@
-
 :root {
     --primary-green: #022c22; /* Deep Islamic Green */
-    --accent-gold: #c5a059;   /* Muted Gold */
-    --text-light: #f1f5f9;
-    --glass-bg: rgba(2, 44, 34, 0.85);
+    --deep-bg: #001a14;
+    --accent-gold: #eebb5d;   /* Muted Gold */
+    --text-light: #ffffff;
+    
+    /* GLASS VARIABLES */
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --gold-border: rgba(238, 187, 93, 0.3);
+    --glass-blur: 16px;
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
 body {
-    background-color: var(--primary-green);
+    background-color: var(--deep-bg);
     color: var(--text-light);
     overflow-x: hidden;
+    min-height: 100vh;
 }
 
-/* Scrollable Pattern Background */
+/* --- BACKGROUND EFFECTS --- */
 .parallax-bg {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    /* Subtle geometric pattern URL */
-    background-image: url("https://www.transparenttextures.com/patterns/arabesque.png");
-    opacity: 0.1;
+    background: 
+        radial-gradient(circle at 10% 20%, rgba(2, 44, 34, 1) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(197, 160, 89, 0.15) 0%, transparent 40%),
+        url("https://www.transparenttextures.com/patterns/arabesque.png");
+    background-color: #000907;
     z-index: -1;
-    background-attachment: fixed; /* Parallax feel */
+    background-attachment: fixed;
 }
 
-/* Navbar */
-.navbar {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 1rem 5%;
-    background: rgba(0,0,0,0.3);
-    backdrop-filter: blur(10px);
-    position: fixed; width: 100%; top: 0; z-index: 100;
-    border-bottom: 1px solid rgba(197, 160, 89, 0.3);
-}
-
-.logo { font-family: 'Amiri', serif; font-size: 1.5rem; color: var(--accent-gold); }
-.nav-links a { color: white; text-decoration: none; margin-left: 20px; font-weight: 500; }
-
-/* Buttons */
-.btn-gold {
-    background: var(--accent-gold); color: var(--primary-green);
-    padding: 8px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;
-}
-.btn-primary {
-    background: transparent; border: 2px solid var(--accent-gold); color: var(--accent-gold);
-    padding: 10px 25px; margin-top: 20px; cursor: pointer; transition: 0.3s;
-}
-.btn-primary:hover { background: var(--accent-gold); color: var(--primary-green); }
-
-/* Pages */
-.page { min-height: 100vh; padding-top: 80px; text-align: center; display: flex; flex-direction: column; align-items: center; }
-.hidden { display: none !important; }
-
-/* Hero Section */
-.hero-content { margin-top: 15vh; }
-.hero-content h1 { font-family: 'Amiri', serif; font-size: 2rem; color: var(--accent-gold); margin-bottom: 10px; }
-.hero-content h2 { font-size: 3rem; margin-bottom: 10px; }
-.gold-text { color: var(--accent-gold); }
-
-/* Course Grid */
-.course-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px; width: 90%; margin-top: 30px;
-}
-.course-card {
-    background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(197, 160, 89, 0.2);
-    padding: 20px; border-radius: 10px; text-align: left;
-}
-.course-card h3 { color: var(--accent-gold); margin-bottom: 10px; }
-
-/* Modal */
-.modal {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 200;
-}
-.modal-content {
-    background: var(--primary-green); padding: 40px; border-radius: 8px; border: 1px solid var(--accent-gold);
-    width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 15px;
-}
-input { padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid #444; color: white; }
-
-/* Divider */
-.auth-divider {
-    margin: 20px 0;
-    text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-    line-height: 0.1em;
-}
-.auth-divider span {
-    background: var(--primary-green); /* Matches background to hide line behind text */
-    padding: 0 10px;
-    color: #888;
-    font-size: 0.8rem;
-}
-
-/* Google Button */
-.btn-google {
-    background: white;
-    color: #333;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    display: flex;
+/* --- TOP BRANDING --- */
+.top-brand {
+    position: fixed; top: 0; left: 0; width: 100%;
+    padding: 15px 20px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+    z-index: 90;
+    
+    /* Flexbox to push Logo left and Button right */
+    display: flex; 
+    justify-content: space-between; 
     align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100%; /* Full width */
-    transition: 0.2s;
-}
-.btn-google:active {
-    background: #f1f1f1;
-    transform: scale(0.98);
+    
+    pointer-events: none; /* Clicks pass through the empty space */
 }
 
-/* Enhanced Course Card */
-.course-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(197, 160, 89, 0.2);
-    border-radius: 12px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 0;
-    overflow: hidden;
-    transition: transform 0.3s ease;
+.logo { 
+    font-family: 'Amiri', serif; 
+    font-size: 1.6rem; 
+    color: var(--accent-gold); 
+    text-shadow: 0 0 10px rgba(238, 187, 93, 0.3);
+    pointer-events: auto; /* Make Logo clickable again */
 }
 
-.course-card:hover {
-    transform: translateY(-5px);
-    border-color: var(--accent-gold);
-}
-
-.card-header {
-    background: rgba(0, 0, 0, 0.2);
-    padding: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.course-card h3 {
+/* New Admin Button */
+.admin-btn-top {
+    pointer-events: auto; /* Make Button clickable */
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--gold-border);
     color: var(--accent-gold);
-    font-size: 1.2rem;
-    margin-bottom: 5px;
-}
-
-.badge {
-    font-size: 0.7rem;
-    background: var(--accent-gold);
-    color: var(--primary-green);
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-weight: bold;
-    text-transform: uppercase;
-}
-
-.desc {
-    padding: 20px;
-    font-size: 0.9rem;
-    color: #ccc;
-}
-
-.features {
-    list-style: none;
-    padding: 0 20px;
-    margin-bottom: 20px;
-}
-
-.features li {
-    font-size: 0.85rem;
-    margin-bottom: 8px;
-    color: #eee;
-}
-
-.features i {
-    color: var(--accent-gold);
-    margin-right: 8px;
-}
-
-.card-footer {
-    padding: 20px;
-    background: rgba(0, 0, 0, 0.2);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.price {
-    font-size: 1.4rem;
-    color: white;
-}
-
-/* Buy Button */
-.btn-buy {
-    background: transparent;
-    border: 1px solid var(--accent-gold);
-    color: var(--accent-gold);
-    padding: 8px 20px;
-    border-radius: 20px;
+    width: 35px; height: 35px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
     cursor: pointer;
-    font-weight: 600;
+    backdrop-filter: blur(5px);
     transition: 0.3s;
 }
 
-.btn-buy:hover {
+.admin-btn-top:active {
+    transform: scale(0.9);
     background: var(--accent-gold);
-    color: var(--primary-green);
+    color: #000;
 }
 
-/* CLASSROOM LAYOUT */
-.classroom-container {
-    display: grid;
-    grid-template-columns: 2fr 1fr; /* Video takes 2 parts, Playlist takes 1 */
-    gap: 20px;
-    width: 95%;
-    max-width: 1200px;
-    margin: 0 auto 20px auto;
-    text-align: left;
+
+/* --- BOTTOM FLOATING NAV (FIXED) --- */
+.bottom-nav {
+    position: fixed; 
+    bottom: 20px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    width: 90%; 
+    max-width: 400px;
+    height: 70px;
+    background: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border-radius: 50px;
+    display: flex; 
+    justify-content: space-between; /* Crucial for alignment */
+    align-items: center;
+    z-index: 1000;
+    padding: 5px;
 }
 
-/* Video Player Area */
-.video-wrapper {
+/* The Navigation Items */
+.nav-item {
     position: relative;
-    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-    height: 0;
-    background: black;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid #333;
-}
-
-.video-wrapper iframe {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-}
-
-.video-area h2 {
-    margin-top: 15px;
-    color: var(--accent-gold);
-}
-
-/* Playlist Area */
-.playlist-area {
-    background: rgba(0,0,0,0.3);
-    border: 1px solid rgba(197, 160, 89, 0.2);
-    border-radius: 8px;
+    color: #aaa;
+    text-decoration: none;
     display: flex;
     flex-direction: column;
-    height: 500px; /* Fixed height with scroll */
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    z-index: 2;
+    flex: 1; /* Crucial: Forces equal width for accurate math */
+    height: 100%;
+    transition: 0.3s;
+    -webkit-tap-highlight-color: transparent;
+    border-radius: 40px;
+}
+.nav-item i { font-size: 1.2rem; transition: 0.3s; }
+.nav-item .label { font-size: 0.75rem; font-weight: 500; transition: 0.3s; }
+
+/* Active State */
+.nav-item.active { color: #000; }
+.nav-item.active i { transform: translateY(-2px); }
+
+/* Sliding Bubble */
+.nav-indicator {
+    position: absolute;
+    top: 5px; 
+    left: 5px;
+    height: 60px; /* Fits inside the 70px container with 5px padding */
+    background: var(--accent-gold);
+    border-radius: 40px;
+    box-shadow: 0 0 15px rgba(238, 187, 93, 0.6);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1;
+    opacity: 0; /* Hidden until JS calculates position */
+}
+.nav-indicator.initialized { opacity: 1; }
+
+/* --- PAGES & LAYOUT --- */
+.page { 
+    min-height: 100vh; 
+    padding-top: 80px; 
+    padding-bottom: 120px; /* Extra padding for bottom nav */
+    text-align: center; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+}
+.hidden { display: none !important; }
+
+/* --- HERO SECTION --- */
+.hero-content { 
+    margin-top: 10vh; 
+    padding: 40px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 20px;
+    backdrop-filter: blur(5px);
+}
+.hero-content h1 { font-family: 'Amiri', serif; font-size: 2.5rem; color: var(--accent-gold); margin-bottom: 10px; }
+.hero-content h2 { font-size: 3rem; margin-bottom: 10px; }
+.gold-text { 
+    background: linear-gradient(to right, #eebb5d, #fff, #eebb5d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
+/* --- BUTTONS --- */
+.btn-gold {
+    background: linear-gradient(135deg, var(--accent-gold), #b88a38);
+    color: #000;
+    padding: 8px 24px; border: none; border-radius: 50px; 
+    cursor: pointer; font-weight: 700;
+    box-shadow: 0 4px 15px rgba(238, 187, 93, 0.3);
+    transition: 0.3s;
+}
+.btn-primary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--accent-gold); 
+    color: var(--accent-gold);
+    padding: 12px 30px; margin-top: 20px; 
+    cursor: pointer; transition: 0.3s; border-radius: 50px;
+    font-weight: 600;
+}
+.btn-primary:hover { 
+    background: var(--accent-gold); 
+    color: #000; 
+}
+.btn-buy {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid var(--accent-gold);
+    color: var(--accent-gold);
+    padding: 8px 20px; border-radius: 30px;
+    cursor: pointer; font-weight: 600; transition: 0.3s;
+}
+.btn-buy:hover { background: var(--accent-gold); color: #000; }
+
+/* --- COURSE CARDS (GLASS) --- */
+.course-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 25px; width: 90%; margin-top: 30px; max-width: 1200px;
+}
+.course-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 20px;
+    padding: 0;
+    overflow: hidden;
+    text-align: left;
+    transition: transform 0.3s ease;
+}
+.course-card:hover { transform: translateY(-5px); border-color: var(--accent-gold); }
+
+.card-header {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 25px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.course-card h3 { color: var(--accent-gold); font-size: 1.4rem; margin-bottom: 5px; }
+.badge { font-size: 0.7rem; background: var(--accent-gold); color: #000; padding: 3px 10px; border-radius: 10px; font-weight: 800; }
+.desc { padding: 25px; font-size: 0.95rem; color: #ddd; }
+.features { list-style: none; padding: 0 25px 25px 25px; }
+.features li { font-size: 0.9rem; margin-bottom: 8px; color: #aaa; display: flex; align-items: center; gap: 10px; }
+.features i { color: var(--accent-gold); }
+.card-footer {
+    padding: 20px 25px;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+.price { font-size: 1.5rem; color: white; }
+
+/* --- CLASSROOM --- */
+.classroom-container {
+    display: grid; grid-template-columns: 2fr 1fr; gap: 25px;
+    width: 95%; max-width: 1300px; margin: 0 auto 20px auto; text-align: left;
+}
+.video-wrapper {
+    position: relative; padding-bottom: 56.25%; background: #000;
+    border-radius: 16px; overflow: hidden;
+    border: 1px solid var(--glass-border);
+}
+.video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.video-area h2 { margin-top: 20px; color: var(--accent-gold); }
+
+.playlist-area {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    display: flex; flex-direction: column; height: 550px;
+}
 .playlist-header {
-    padding: 15px;
-    background: rgba(255,255,255,0.05);
+    padding: 20px; background: rgba(0,0,0,0.4);
     border-bottom: 1px solid rgba(255,255,255,0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    display: flex; justify-content: space-between;
 }
-
-.playlist-items {
-    overflow-y: auto;
-    flex-grow: 1;
-}
-
-/* Playlist Item */
 .lesson-item {
-    padding: 15px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    cursor: pointer;
-    transition: 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05);
+    cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 12px;
 }
-
-.lesson-item:hover {
-    background: rgba(197, 160, 89, 0.1);
-}
-
+.lesson-item:hover { background: rgba(255, 255, 255, 0.08); }
 .lesson-item.active {
-    background: rgba(197, 160, 89, 0.2);
-    border-left: 3px solid var(--accent-gold);
+    background: rgba(238, 187, 93, 0.15);
+    border-left: 4px solid var(--accent-gold);
 }
 
-.lesson-item i {
-    color: #888;
-    font-size: 0.8rem;
+/* --- MODAL --- */
+.modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 2000;
+    backdrop-filter: blur(5px);
+}
+.modal-content {
+    background: rgba(10, 30, 25, 0.95);
+    padding: 40px; border-radius: 20px; border: 1px solid var(--gold-border);
+    width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 15px;
+}
+input { 
+    padding: 12px; background: rgba(0,0,0,0.3); 
+    border: 1px solid rgba(255,255,255,0.2); 
+    color: white; border-radius: 8px; outline: none;
+}
+.auth-divider { margin: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); position:relative; height:1px; text-align:center; }
+.auth-divider span { background: #08201a; position: relative; top: -10px; padding: 0 10px; color: #aaa; font-size:0.8rem;}
+
+.btn-google {
+    background: white; color: #333;
+    padding: 12px; border-radius: 50px;
+    font-weight: bold; width: 100%; border:none;
+    display:flex; justify-content: center; align-items: center; gap:10px;
 }
 
-.lesson-item.locked {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Mobile Responsiveness */
+/* --- MOBILE --- */
 @media (max-width: 768px) {
-    .classroom-container {
-        grid-template-columns: 1fr; /* Stack on top of each other */
-    }
-    .playlist-area {
-        height: 300px;
-    }
+    .hero-content h2 { font-size: 2.2rem; }
+    .classroom-container { grid-template-columns: 1fr; }
+    .playlist-area { height: 350px; }
 }
-

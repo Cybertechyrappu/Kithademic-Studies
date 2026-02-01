@@ -76,10 +76,12 @@ window.switchTab = (element, pageId) => {
 document.addEventListener("DOMContentLoaded", () => {
     const activeBtn = document.querySelector('.nav-item.active'); 
     if(activeBtn) setTimeout(() => window.switchTab(activeBtn, null), 100); 
+    // Load courses immediately for guests (showing only Buy buttons)
+    renderCourses(null);
 });
 
 // ==========================================
-// 4. AUTHENTICATION
+// 4. AUTHENTICATION & LISTENERS
 // ==========================================
 window.handleGoogleAuth = async () => {
     try {
@@ -97,10 +99,15 @@ onAuthStateChanged(auth, async (user) => {
     const loginView = document.getElementById('loginContent');
     const profileView = document.getElementById('profileContent');
 
+    // 1. RE-RENDER COURSES (Updates buttons based on user access)
+    await renderCourses(user);
+
     if (user) {
+        // Logged In UI
         const photoURL = user.photoURL || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
         if(navIconDiv) navIconDiv.innerHTML = `<img src="${photoURL}" class="nav-user-img" alt="User">`;
         if(label) label.innerText = "Profile";
+        
         if(loginView) loginView.classList.add('hidden');
         if(profileView) {
             profileView.classList.remove('hidden');
@@ -110,8 +117,10 @@ onAuthStateChanged(auth, async (user) => {
         }
         await checkAndCreateProfile(user);
     } else {
+        // Logged Out UI
         if(navIconDiv) navIconDiv.innerHTML = `<i class="fas fa-user"></i>`;
         if(label) label.innerText = "Login";
+        
         if(loginView) loginView.classList.remove('hidden');
         if(profileView) profileView.classList.add('hidden');
         showPage('home'); 
@@ -127,7 +136,7 @@ window.handleSignOut = () => {
 };
 
 // ==========================================
-// 5. DATABASE
+// 5. DATABASE & COURSE LOGIC
 // ==========================================
 async function checkAndCreateProfile(user) {
     const userRef = doc(db, "users", user.uid);
@@ -148,21 +157,47 @@ async function checkSubscription(userId) {
     return { hasAccess: false };
 }
 
-// Render Courses
-const courseList = document.getElementById('courseList');
-if(courseList) {
+// --- NEW: DYNAMIC COURSE RENDERING ---
+async function renderCourses(user) {
+    const courseList = document.getElementById('courseList');
+    if(!courseList) return;
+
+    let hasAccess = false;
+    
+    // Only check DB if user is logged in
+    if (user) {
+        courseList.innerHTML = '<p style="color:#aaa; text-align:center;">Checking subscription...</p>';
+        const sub = await checkSubscription(user.uid);
+        hasAccess = sub.hasAccess;
+    }
+
     courseList.innerHTML = ""; 
+
     courses.forEach(c => {
         const div = document.createElement('div');
         div.className = 'course-card';
         const featuresHtml = c.features.map(f => `<li><i class="fas fa-check-circle"></i> ${f}</li>`).join('');
+        
+        // LOGIC: Hide "Open" unless free or user has paid access
+        let actionButton = "";
+        
+        if (c.price === 0) {
+            // Free Course -> Open
+            actionButton = `<button class="btn-gold" style="font-size:0.8rem;" onclick="openCourse('${c.id}')"><i class="fas fa-play"></i> Open</button>`;
+        } else if (hasAccess) {
+            // Paid & Has Access -> Open
+            actionButton = `<button class="btn-gold" style="font-size:0.8rem;" onclick="openCourse('${c.id}')"><i class="fas fa-play"></i> Open</button>`;
+        } else {
+            // Paid & No Access -> Buy Only
+            actionButton = `<button class="btn-buy" onclick="buyCourse('${c.id}')">Buy</button>`;
+        }
+
         div.innerHTML = `
             <div class="card-header"><h3>${c.title}</h3><span class="badge">${c.price === 0 ? "FREE" : "3-Month Plan"}</span></div>
             <p class="desc">${c.desc}</p><ul class="features">${featuresHtml}</ul>
             <div class="card-footer"><b class="price">₹${c.price}</b>
             <div style="display:flex; gap:10px;">
-            <button class="btn-buy" onclick="buyCourse('${c.id}')">${c.price === 0 ? "Enroll" : "Buy"}</button>
-            <button class="btn-gold" style="font-size:0.8rem;" onclick="openCourse('${c.id}')"><i class="fas fa-play"></i> Open</button>
+                ${actionButton}
             </div></div>`;
         courseList.appendChild(div);
     });
@@ -177,12 +212,12 @@ window.buyCourse = (courseId) => {
 };
 
 // ==========================================
-// 6. CLASSROOM & PLAYER (ORIGINAL IFRAME)
+// 6. CLASSROOM & PLAYER
 // ==========================================
 window.openCourse = async (courseId) => {
     if (!auth.currentUser) { alert("Login first."); openAuthModal(); return; }
     
-    // Check Sub
+    // Double Check Sub
     const course = courses.find(c => c.id === courseId);
     if (course.price > 0) {
         const sub = await checkSubscription(auth.currentUser.uid);
@@ -211,9 +246,7 @@ window.openCourse = async (courseId) => {
 };
 
 window.playVideo = (id, title, el) => {
-    // Standard YouTube Embed Update
     document.getElementById('mainPlayer').src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`;
-    
     document.getElementById('videoTitle').innerText = title;
     document.querySelectorAll('.lesson-item').forEach(x => x.classList.remove('active'));
     if(el) el.classList.add('active');
@@ -226,10 +259,15 @@ window.openAdminCheck = () => {
     else if (password !== null) { alert("Access Denied"); }
 };
 
+// --- UPDATED ADMIN: 90 DAYS ---
 window.addMonth = async () => {
     const uid = document.getElementById('studentId').value;
     if (!uid) return alert("Enter UID");
-    const future = new Date(); future.setDate(future.getDate() + 30);
+    
+    // Changed logic to add 90 Days
+    const future = new Date(); 
+    future.setDate(future.getDate() + 90);
+    
     await updateDoc(doc(db, "users", uid), { expiryDate: future.toISOString() });
-    alert("Success! 30 Days Added.");
+    alert("Success! 90 Days Added.");
 };

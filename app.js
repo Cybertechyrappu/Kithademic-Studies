@@ -6,7 +6,8 @@ import {
     getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup 
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { 
-    getFirestore, doc, getDoc, setDoc, updateDoc 
+    getFirestore, doc, getDoc, setDoc, updateDoc, 
+    collection, query, orderBy, limit, getDocs, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -76,7 +77,7 @@ window.switchTab = (element, pageId) => {
 document.addEventListener("DOMContentLoaded", () => {
     const activeBtn = document.querySelector('.nav-item.active'); 
     if(activeBtn) setTimeout(() => window.switchTab(activeBtn, null), 100); 
-    // Load courses immediately for guests (showing only Buy buttons)
+    // Initial Render for Guests
     renderCourses(null);
 });
 
@@ -99,11 +100,11 @@ onAuthStateChanged(auth, async (user) => {
     const loginView = document.getElementById('loginContent');
     const profileView = document.getElementById('profileContent');
 
-    // 1. RE-RENDER COURSES (Updates buttons based on user access)
+    // 1. Re-Render Courses based on new Auth State
     await renderCourses(user);
 
     if (user) {
-        // Logged In UI
+        // Logged In
         const photoURL = user.photoURL || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
         if(navIconDiv) navIconDiv.innerHTML = `<img src="${photoURL}" class="nav-user-img" alt="User">`;
         if(label) label.innerText = "Profile";
@@ -115,9 +116,13 @@ onAuthStateChanged(auth, async (user) => {
             document.getElementById('userName').innerText = user.displayName || "Student";
             document.getElementById('userEmail').innerText = user.email;
         }
+
+        // 2. Load History
+        await loadHistory(user);
+
         await checkAndCreateProfile(user);
     } else {
-        // Logged Out UI
+        // Logged Out
         if(navIconDiv) navIconDiv.innerHTML = `<i class="fas fa-user"></i>`;
         if(label) label.innerText = "Login";
         
@@ -136,7 +141,7 @@ window.handleSignOut = () => {
 };
 
 // ==========================================
-// 5. DATABASE & COURSE LOGIC
+// 5. DATABASE & LOGIC
 // ==========================================
 async function checkAndCreateProfile(user) {
     const userRef = doc(db, "users", user.uid);
@@ -157,14 +162,12 @@ async function checkSubscription(userId) {
     return { hasAccess: false };
 }
 
-// --- NEW: DYNAMIC COURSE RENDERING ---
 async function renderCourses(user) {
     const courseList = document.getElementById('courseList');
     if(!courseList) return;
 
     let hasAccess = false;
     
-    // Only check DB if user is logged in
     if (user) {
         courseList.innerHTML = '<p style="color:#aaa; text-align:center;">Checking subscription...</p>';
         const sub = await checkSubscription(user.uid);
@@ -178,17 +181,14 @@ async function renderCourses(user) {
         div.className = 'course-card';
         const featuresHtml = c.features.map(f => `<li><i class="fas fa-check-circle"></i> ${f}</li>`).join('');
         
-        // LOGIC: Hide "Open" unless free or user has paid access
+        // Button Logic
         let actionButton = "";
         
         if (c.price === 0) {
-            // Free Course -> Open
             actionButton = `<button class="btn-gold" style="font-size:0.8rem;" onclick="openCourse('${c.id}')"><i class="fas fa-play"></i> Open</button>`;
         } else if (hasAccess) {
-            // Paid & Has Access -> Open
             actionButton = `<button class="btn-gold" style="font-size:0.8rem;" onclick="openCourse('${c.id}')"><i class="fas fa-play"></i> Open</button>`;
         } else {
-            // Paid & No Access -> Buy Only
             actionButton = `<button class="btn-buy" onclick="buyCourse('${c.id}')">Buy</button>`;
         }
 
@@ -212,12 +212,11 @@ window.buyCourse = (courseId) => {
 };
 
 // ==========================================
-// 6. CLASSROOM & PLAYER
+// 6. CLASSROOM & HISTORY
 // ==========================================
 window.openCourse = async (courseId) => {
     if (!auth.currentUser) { alert("Login first."); openAuthModal(); return; }
     
-    // Double Check Sub
     const course = courses.find(c => c.id === courseId);
     if (course.price > 0) {
         const sub = await checkSubscription(auth.currentUser.uid);
@@ -241,72 +240,117 @@ window.openCourse = async (courseId) => {
         pl.appendChild(d);
     });
     
-    // Play First Video
     if(lessons.length) window.playVideo(lessons[0].videoId, lessons[0].title, pl.firstChild);
 };
 
 window.playVideo = (id, title, el) => {
     document.getElementById('mainPlayer').src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`;
     document.getElementById('videoTitle').innerText = title;
+    
     document.querySelectorAll('.lesson-item').forEach(x => x.classList.remove('active'));
     if(el) el.classList.add('active');
+
+    // SAVE HISTORY
+    saveHistory(id, title);
 };
 
-// Admin
+// --- HISTORY FUNCTIONS ---
+async function saveHistory(videoId, title) {
+    const user = auth.currentUser;
+    if(!user) return;
+    
+    const historyRef = doc(db, "users", user.uid, "watchHistory", videoId);
+    try {
+        await setDoc(historyRef, {
+            videoId: videoId,
+            title: title,
+            timestamp: serverTimestamp()
+        });
+        loadHistory(user); // Reload list
+    } catch(e) { console.log("History save error", e); }
+}
+
+async function loadHistory(user) {
+    const list = document.getElementById('historyList');
+    if(!list) return;
+
+    const q = query(
+        collection(db, "users", user.uid, "watchHistory"), 
+        orderBy("timestamp", "desc"), 
+        limit(5)
+    );
+    
+    const snapshot = await getDocs(q);
+    list.innerHTML = ""; 
+    
+    if(snapshot.empty) {
+        list.innerHTML = "<p style='color:#666; font-size:0.8rem; font-style:italic;'>No classes watched yet.</p>";
+        return;
+    }
+
+    snapshot.forEach(doc => {
+        const data = doc.data();
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerHTML = `<i class="fas fa-play-circle"></i> <span>${data.title}</span>`;
+        div.onclick = () => {
+            closeAuthModal();
+            findAndPlayVideo(data.videoId);
+        };
+        list.appendChild(div);
+    });
+}
+
+function findAndPlayVideo(videoId) {
+    for (const [courseId, lessons] of Object.entries(courseContent)) {
+        const lesson = lessons.find(l => l.videoId === videoId);
+        if (lesson) {
+            openCourse(courseId).then(() => {
+                setTimeout(() => playVideo(videoId, lesson.title, null), 500);
+            });
+            return;
+        }
+    }
+}
+
+// ==========================================
+// 7. ADMIN & PWA
+// ==========================================
 window.openAdminCheck = () => {
     const password = prompt("Enter Admin Password:");
     if (password === "syd@123%") { showPage('adminPanel'); } 
     else if (password !== null) { alert("Access Denied"); }
 };
 
-// --- UPDATED ADMIN: 90 DAYS ---
 window.addMonth = async () => {
     const uid = document.getElementById('studentId').value;
     if (!uid) return alert("Enter UID");
-    
-    // Changed logic to add 90 Days
-    const future = new Date(); 
-    future.setDate(future.getDate() + 90);
-    
+    const future = new Date(); future.setDate(future.getDate() + 90);
     await updateDoc(doc(db, "users", uid), { expiryDate: future.toISOString() });
     alert("Success! 90 Days Added.");
 };
 
-// ==========================================
-// 7. PWA INSTALLATION LOGIC
-// ==========================================
+// --- PWA INSTALL ---
 let deferredPrompt;
-
-// 1. Listen for the install prompt availability
 window.addEventListener('beforeinstallprompt', (e) => {
-    // Prevent the mini-infobar from appearing on mobile
     e.preventDefault();
-    // Stash the event so it can be triggered later.
     deferredPrompt = e;
-    // Show the install button in the Profile menu
     const installBtn = document.getElementById('installBtn');
     if(installBtn) installBtn.style.display = 'block';
 });
 
-// 2. Handle the Install Button Click
 window.installApp = async () => {
     if (!deferredPrompt) return;
-    // Show the install prompt
     deferredPrompt.prompt();
-    // Wait for the user to respond to the prompt
     const { outcome } = await deferredPrompt.userChoice;
-    console.log(`User response to install prompt: ${outcome}`);
-    // We've used the prompt, and can't use it again, discard it
+    console.log(`User response: ${outcome}`);
     deferredPrompt = null;
-    // Hide the button again
-    document.getElementById('installBtn').style.display = 'none';
 };
 
-// 3. Register Service Worker (Required for PWA)
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('Service Worker Registered'))
-            .catch(err => console.log('Service Worker Failed', err));
+            .then(reg => console.log('SW Registered'))
+            .catch(err => console.log('SW Failed', err));
     });
 }

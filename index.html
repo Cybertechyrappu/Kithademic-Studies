@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kithademic Studies</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-book-quran"></i> Kithademic
+        </div>
+        <div class="nav-links">
+            <a href="#" onclick="showPage('home')">Home</a>
+            <a href="#" onclick="showPage('courses')">Courses</a>
+            <button id="authBtn" class="btn-gold" onclick="openAuthModal()">Sign In</button>
+        </div>
+    </nav>
+
+    <div class="parallax-bg"></div>
+
+    <main id="app">
+        <section id="home" class="page active">
+            <div class="hero-content">
+                <h1 class="arabic-font">بِسْمِ ٱللَّٰهِ</h1>
+                <h2>Welcome to <span class="gold-text">Kithademic Studies</span></h2>
+                <p>Knowledge is the light of the heart. Excellence in Education.</p>
+                <button class="btn-primary" onclick="showPage('courses')">Start Learning</button>
+            </div>
+        </section>
+
+        <section id="courses" class="page hidden">
+            <h2 class="section-title">Our Premium Courses</h2>
+            <div class="course-grid" id="courseList">
+                </div>
+        </section>
+        <section id="classroom" class="page hidden">
+    <div class="classroom-container">
+        <div class="video-area">
+            <div class="video-wrapper">
+                <iframe id="mainPlayer" src="" frameborder="0" allowfullscreen></iframe>
+            </div>
+            <h2 id="videoTitle">Select a Class to Start</h2>
+            <p id="videoDesc">Description will appear here.</p>
+        </div>
+
+        <div class="playlist-area">
+            <div class="playlist-header">
+                <h3>Course Content</h3>
+                <span id="progressText">0% Complete</span>
+            </div>
+            <div id="playlistItems" class="playlist-items">
+                </div>
+        </div>
+    </div>
+    <button class="btn-primary" onclick="showPage('courses')">← Back to Courses</button>
+</section>
+
+    </main>
+
+    <div id="authModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" onclick="closeAuthModal()">&times;</span>
+            <h2 id="modalTitle">Student Portal</h2>
+            <input type="email" id="email" placeholder="Email Address">
+            <input type="password" id="password" placeholder="Password">
+            <button class="btn-primary" onclick="handleAuth()">Enter</button>
+            <p id="toggleAuth" onclick="toggleAuthMode()">New here? Create Account</p>
+            <div class="auth-divider">
+    <span>OR</span>
+</div>
+
+<button class="btn-google" onclick="handleGoogleAuth()">
+    <i class="fab fa-google"></i> Continue with Google
+</button>
+
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

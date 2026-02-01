@@ -12,8 +12,7 @@
 
     <div class="top-brand">
         <div class="logo">
-            <i class="fas fa-book-quran"></i> Kithademic
-        </div>
+            <i class="fas fa-book-quran"></i>        </div>
         <button class="admin-btn-top" onclick="openAdminCheck()">
             <i class="fas fa-user-shield"></i>
         </button>
@@ -26,8 +25,9 @@
         <section id="home" class="page active">
             <div class="hero-content">
                 <h1 class="arabic-font">بِسْمِ ٱللَّٰهِ</h1>
-                <h2>Welcome to <span class="gold-text">Kithademic</span></h2>
-                <p>Knowledge is the light of the heart.<br>Excellence in Islamic & Academic Education.</p>
+                <h2>Welcome to <span class="gold-text">Kithademic Studies</span></h2>
+                
+               
                 <button class="btn-primary" onclick="switchTab(document.querySelectorAll('.nav-item')[1], 'courses')">Start Learning</button>
             </div>
         </section>
@@ -95,26 +95,12 @@
         <div class="modal-content">
             <span class="close" onclick="closeAuthModal()" style="float:right; cursor:pointer; font-size:1.5rem;">&times;</span>
 
-            <div id="loginContent">
-                <h2 id="modalTitle">Student Portal</h2>
+            <div id="loginContent" style="text-align: center; padding-bottom: 10px;">
+                <h2 id="modalTitle" style="margin-bottom: 30px;">Register</h2>
                 
-                <div class="input-group">
-                    <input type="email" id="email" required>
-                    <label for="email">Email Address</label>
-                </div>
-
-                <div class="input-group">
-                    <input type="password" id="password" required>
-                    <label for="password">Password</label>
-                </div>
-                
-                <button class="btn-primary" onclick="handleAuth()" style="width:100%; margin-top: 10px;">Enter</button>
-                
-                <p id="toggleAuth" onclick="toggleAuthMode()" style="margin-top:15px; cursor:pointer; font-size:0.8rem; text-align:center;">
-                    New here? Create Account
+                <p style="color:#aaa; margin-bottom: 20px; font-size: 0.9rem;">
+                    Access your courses and track your progress.
                 </p>
-                
-                <div class="auth-divider"><span>OR</span></div>
 
                 <button class="btn-google" onclick="handleGoogleAuth()">
                     <i class="fab fa-google"></i> Continue with Google

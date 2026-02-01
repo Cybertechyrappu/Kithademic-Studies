@@ -2,6 +2,7 @@
     --primary-green: #022c22;
     --deep-bg: #001a14;
     --accent-gold: #eebb5d;
+    --accent-gold1: #eebb5d;
     --text-light: #ffffff;
     
     --glass-bg: rgba(255, 255, 255, 0.05);
@@ -59,8 +60,8 @@ body {
 .bottom-nav {
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
     width: 90%; max-width: 400px; height: 70px;
-    background: rgba(20, 20, 20, 0.85);
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: rgba(20, 20, 20, 0.25);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     border-radius: 50px;
@@ -97,7 +98,8 @@ body {
 }
 .hero-content h1 { font-family: 'Amiri', serif; font-size: 2.5rem; color: var(--accent-gold); margin-bottom: 10px; }
 .hero-content h2 { font-size: 3rem; margin-bottom: 10px; }
-.gold-text { background: linear-gradient(to right, #eebb5d, #fff, #eebb5d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.gold-text { background: var(--accent-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.gold-text1 { background: var(--text-light); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
 /* --- BUTTONS --- */
 .btn-gold {

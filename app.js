@@ -271,3 +271,42 @@ window.addMonth = async () => {
     await updateDoc(doc(db, "users", uid), { expiryDate: future.toISOString() });
     alert("Success! 90 Days Added.");
 };
+
+// ==========================================
+// 7. PWA INSTALLATION LOGIC
+// ==========================================
+let deferredPrompt;
+
+// 1. Listen for the install prompt availability
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent the mini-infobar from appearing on mobile
+    e.preventDefault();
+    // Stash the event so it can be triggered later.
+    deferredPrompt = e;
+    // Show the install button in the Profile menu
+    const installBtn = document.getElementById('installBtn');
+    if(installBtn) installBtn.style.display = 'block';
+});
+
+// 2. Handle the Install Button Click
+window.installApp = async () => {
+    if (!deferredPrompt) return;
+    // Show the install prompt
+    deferredPrompt.prompt();
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to install prompt: ${outcome}`);
+    // We've used the prompt, and can't use it again, discard it
+    deferredPrompt = null;
+    // Hide the button again
+    document.getElementById('installBtn').style.display = 'none';
+};
+
+// 3. Register Service Worker (Required for PWA)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker Registered'))
+            .catch(err => console.log('Service Worker Failed', err));
+    });
+}

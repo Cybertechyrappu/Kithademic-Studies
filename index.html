@@ -10,16 +10,14 @@
 </head>
 <body>
 
-<div class="top-brand">
-    <div class="logo">
-        <i class="fas fa-book-quran"></i> Kithademic
+    <div class="top-brand">
+        <div class="logo">
+            <i class="fas fa-book-quran"></i> Kithademic
+        </div>
+        <button class="admin-btn-top" onclick="openAdminCheck()">
+            <i class="fas fa-user-shield"></i>
+        </button>
     </div>
-    
-    <button class="admin-btn-top" onclick="openAdminCheck()">
-        <i class="fas fa-user-shield"></i>
-    </button>
-</div>
-
 
     <div class="parallax-bg"></div>
 
@@ -28,7 +26,7 @@
         <section id="home" class="page active">
             <div class="hero-content">
                 <h1 class="arabic-font">بِسْمِ ٱللَّٰهِ</h1>
-                <h2>Welcome to <span class="gold-text">Kithademic Studies</span></h2>
+                <h2>Welcome to <span class="gold-text">Kithademic</span></h2>
                 <p>Knowledge is the light of the heart.<br>Excellence in Islamic & Academic Education.</p>
                 <button class="btn-primary" onclick="switchTab(document.querySelectorAll('.nav-item')[1], 'courses')">Start Learning</button>
             </div>
@@ -85,8 +83,10 @@
             <span class="label">Courses</span>
         </a>
 
-        <a href="#" class="nav-item" onclick="openAuthModal()">
-            <i class="fas fa-user"></i>
+        <a href="#" class="nav-item" onclick="switchTab(this, null); openAuthModal()">
+            <div id="navAuthIcon" class="icon-container">
+                <i class="fas fa-user"></i>
+            </div>
             <span class="label" id="authLabel">Login</span>
         </a>
     </nav>
@@ -94,22 +94,42 @@
     <div id="authModal" class="modal hidden">
         <div class="modal-content">
             <span class="close" onclick="closeAuthModal()" style="float:right; cursor:pointer; font-size:1.5rem;">&times;</span>
-            <h2 id="modalTitle">Student Portal</h2>
-            
-            <input type="email" id="email" placeholder="Email Address">
-            <input type="password" id="password" placeholder="Password">
-            
-            <button class="btn-primary" onclick="handleAuth()" style="width:100%">Enter</button>
-            
-            <p id="toggleAuth" onclick="toggleAuthMode()" style="margin-top:10px; cursor:pointer; font-size:0.8rem; text-align:center;">
-                New here? Create Account
-            </p>
-            
-            <div class="auth-divider"><span>OR</span></div>
 
-            <button class="btn-google" onclick="handleGoogleAuth()">
-                <i class="fab fa-google"></i> Continue with Google
-            </button>
+            <div id="loginContent">
+                <h2 id="modalTitle">Student Portal</h2>
+                
+                <div class="input-group">
+                    <input type="email" id="email" required>
+                    <label for="email">Email Address</label>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="password" required>
+                    <label for="password">Password</label>
+                </div>
+                
+                <button class="btn-primary" onclick="handleAuth()" style="width:100%; margin-top: 10px;">Enter</button>
+                
+                <p id="toggleAuth" onclick="toggleAuthMode()" style="margin-top:15px; cursor:pointer; font-size:0.8rem; text-align:center;">
+                    New here? Create Account
+                </p>
+                
+                <div class="auth-divider"><span>OR</span></div>
+
+                <button class="btn-google" onclick="handleGoogleAuth()">
+                    <i class="fab fa-google"></i> Continue with Google
+                </button>
+            </div>
+
+            <div id="profileContent" class="hidden" style="text-align:center;">
+                <img id="userProfileImg" src="" alt="Profile" class="big-profile-img">
+                <h2 id="userName" class="gold-text">Student Name</h2>
+                <p id="userEmail" style="color:#aaa; margin-bottom:20px;">student@gmail.com</p>
+                <div class="profile-actions">
+                    <button class="btn-primary" onclick="signOut(auth)" style="width:100%; border-color:#ff4444; color:#ff4444;">Log Out</button>
+                </div>
+            </div>
+
         </div>
     </div>
 

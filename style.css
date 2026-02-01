@@ -1,3 +1,4 @@
+
 :root {
     --primary-green: #022c22; /* Deep Islamic Green */
     --accent-gold: #c5a059;   /* Muted Gold */
@@ -304,3 +305,4 @@ input { padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid #444
         height: 300px;
     }
 }
+

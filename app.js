@@ -44,41 +44,20 @@ const adminPhone = "919526755210";
 // ==========================================
 const courses = [
     { 
-        id: "c_bio_01",
-        title: "+2 Bio-Science Mastery", 
-        price: 4999, 
-        desc: "Complete revisions and mock tests.",
-        features: ["Live Classes", "PDF Notes", "24/7 Support"]
+        id: "c_01",
+        title: "പ്രാക്റ്റിക്കൽ ഫിഖ്ഹ് കോഴ്സ്", 
+        price: 200, 
+        desc: "ഫത്ഹുൽ മുഈൻ അടിസ്ഥാനത്തിൽ",
+        features: ["ട്യൂട്ടർ: യാസീൻ സിദ്ദീഖ് നൂറാനി", "ക്ലാസ് രീതി: റെക്കോർഡ് ചെയ്ത വീഡിയോകൾ", "ക്ലാസ്സുകളുടെ എണ്ണം: ആഴ്ചയിൽ 4"]
     },
-    { 
-        id: "c_ent_02",
-        title: "Entrance Crash Course", 
-        price: 2999, 
-        desc: "Physics, Chemistry, and Biology focus.",
-        features: ["Mock Tests", "Previous Year QPs"]
-    },
-    { 
-        id: "c_his_03",
-        title: "Islamic History", 
-        price: 0, 
-        desc: "The golden age of science and faith.",
-        features: ["Documentary Access", "E-Book"]
-    }
 ];
 
 const courseContent = {
-    "c_bio_01": [
+    "c_01": [
         { title: "Introduction to Botany", videoId: "dQw4w9WgXcQ" }, 
         { title: "Photosynthesis Explained", videoId: "KMT1J3Lg6h0" },
         { title: "Genetics Part 1", videoId: "8jP8CC23ibY" }
     ],
-    "c_ent_02": [
-        { title: "Physics: Motion", videoId: "kKKM8Y-u7ds" },
-        { title: "Chemistry: Periodic Table", videoId: "fPnwBITSmgU" }
-    ],
-    "c_his_03": [
-        { title: "Golden Age of Islam", videoId: "9gXw3Jj3JjI" }
-    ]
 };
 
 // ==========================================
@@ -205,7 +184,7 @@ if(courseList) {
         div.innerHTML = `
             <div class="card-header">
                 <h3>${c.title}</h3>
-                <span class="badge">${c.price === 0 ? "FREE" : "PREMIUM"}</span>
+                <span class="badge">${c.price === 0 ? "FREE" : "3-Month Payment"}</span>
             </div>
             <p class="desc">${c.desc}</p>
             <ul class="features">${featuresHtml}</ul>
@@ -325,3 +304,20 @@ window.addMonth = async () => {
         document.getElementById('adminStatus').innerText = "Created & Active until: " + futureDate.toDateString();
     }
 };
+
+// ==========================================
+// 9. SECRET ADMIN TRIGGER
+// ==========================================
+let tapCount = 0;
+document.querySelector('.logo').addEventListener('click', () => {
+    tapCount++;
+    if (tapCount === 5) {
+        const password = prompt("Enter Admin Password:");
+        if (password === "syd@123%") { // Change this to a real password
+            showPage('adminPanel');
+        }
+        tapCount = 0; // Reset
+    }
+    // Reset count if not clicked quickly enough
+    setTimeout(() => { tapCount = 0; }, 2000);
+});

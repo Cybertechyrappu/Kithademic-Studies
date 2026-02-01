@@ -25,15 +25,8 @@ const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 const adminPhone = "919526755210"; 
 
-// --- INITIALIZE MODERN PLAYER ---
-// This creates the player instance
-let player;
-document.addEventListener('DOMContentLoaded', () => {
-    player = new Plyr('#player', {
-        controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'],
-        youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
-    });
-});
+// Player Variable
+let player = null;
 
 // ==========================================
 // 2. DATA
@@ -186,8 +179,13 @@ window.buyCourse = (courseId) => {
     window.open(`https://wa.me/${adminPhone}?text=${msg}`, '_blank');
 };
 
+// ==========================================
+// 6. CLASSROOM & PLAYER LOGIC (FIXED)
+// ==========================================
 window.openCourse = async (courseId) => {
     if (!auth.currentUser) { alert("Login first."); openAuthModal(); return; }
+    
+    // Check Sub
     const course = courses.find(c => c.id === courseId);
     if (course.price > 0) {
         const sub = await checkSubscription(auth.currentUser.uid);
@@ -196,10 +194,24 @@ window.openCourse = async (courseId) => {
             return;
         }
     }
+
     const lessons = courseContent[courseId];
     if (!lessons) return alert("Coming Soon.");
 
+    // 1. Show the page FIRST
     showPage('classroom');
+
+    // 2. Initialize Player NOW (Since element is visible)
+    if (!player) {
+        try {
+            player = new Plyr('#player', {
+                controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'],
+                youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
+            });
+        } catch(e) { console.log("Player init error", e); }
+    }
+
+    // 3. Load Playlist
     const pl = document.getElementById('playlistItems');
     pl.innerHTML = "";
     lessons.forEach((l, i) => {
@@ -209,21 +221,18 @@ window.openCourse = async (courseId) => {
         d.onclick = () => window.playVideo(l.videoId, l.title, d);
         pl.appendChild(d);
     });
+    
+    // 4. Play First Video
     if(lessons.length) window.playVideo(lessons[0].videoId, lessons[0].title, pl.firstChild);
 };
 
-// --- MODIFIED PLAY VIDEO (USES PLYR) ---
 window.playVideo = (id, title, el) => {
-    // Update Plyr Source
+    // Switch Source
     if(player) {
         player.source = {
             type: 'video',
-            sources: [
-                { src: id, provider: 'youtube' },
-            ],
+            sources: [{ src: id, provider: 'youtube' }],
         };
-        // Auto play (optional)
-        player.play();
     }
     
     document.getElementById('videoTitle').innerText = title;
@@ -231,6 +240,7 @@ window.playVideo = (id, title, el) => {
     if(el) el.classList.add('active');
 };
 
+// Admin
 window.openAdminCheck = () => {
     const password = prompt("Enter Admin Password:");
     if (password === "syd@123%") { showPage('adminPanel'); } 

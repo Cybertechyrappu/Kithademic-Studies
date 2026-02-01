@@ -19,7 +19,7 @@ import {
     updateDoc 
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-// --- YOUR FIREBASE CONFIGURATION ---
+// --- CONFIGURATION ---
 const firebaseConfig = {
     apiKey: "AIzaSyDm97rTDsP1sELznlVKLogPBkMiy0fpc9c",
     authDomain: "kithademic-studies.firebaseapp.com",
@@ -30,17 +30,14 @@ const firebaseConfig = {
     measurementId: "G-NXT6ZVKHSH"
 };
 
-// Initialize Services
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
-
-// --- YOUR WHATSAPP NUMBER ---
 const adminPhone = "919526755210"; 
 
 // ==========================================
-// 2. DATA (COURSES & VIDEOS)
+// 2. DATA (COURSES)
 // ==========================================
 const courses = [
     { 
@@ -54,14 +51,14 @@ const courses = [
 
 const courseContent = {
     "c_01": [
-        { title: "Introduction to Botany", videoId: "dQw4w9WgXcQ" }, 
-        { title: "Photosynthesis Explained", videoId: "KMT1J3Lg6h0" },
-        { title: "Genetics Part 1", videoId: "8jP8CC23ibY" }
+        { title: "Introduction to Course", videoId: "dQw4w9WgXcQ" }, 
+        { title: "Chapter 1: Basics", videoId: "KMT1J3Lg6h0" },
+        { title: "Chapter 2: Advanced", videoId: "8jP8CC23ibY" }
     ],
 };
 
 // ==========================================
-// 3. UI NAVIGATION & STATE
+// 3. UI NAVIGATION (BUBBLE FIX HERE)
 // ==========================================
 let isLoginMode = true;
 
@@ -80,8 +77,43 @@ window.toggleAuthMode = () => {
     document.getElementById('toggleAuth').innerText = isLoginMode ? "New here? Create Account" : "Already have an account? Login";
 };
 
+// --- BUBBLE ANIMATION ---
+window.switchTab = (element, pageId) => {
+    if(pageId) showPage(pageId);
+
+    const bubble = document.getElementById('navBubble');
+    const nav = document.querySelector('.bottom-nav');
+    
+    // Calculate Position
+    const navRect = nav.getBoundingClientRect();
+    const itemRect = element.getBoundingClientRect();
+    const offsetLeft = itemRect.left - navRect.left;
+    
+    // Move Bubble
+    bubble.style.width = `${itemRect.width}px`;
+    bubble.style.transform = `translateX(${offsetLeft}px)`;
+    bubble.classList.add('initialized'); // Makes it visible
+
+    // Set Active State
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    element.classList.add('active');
+};
+
+// --- INITIALIZATION FIX ---
+document.addEventListener("DOMContentLoaded", () => {
+    // Find the item that is ALREADY active in HTML (which is Home)
+    const activeBtn = document.querySelector('.nav-item.active'); 
+
+    if(activeBtn) {
+        // Trigger the bubble calculation immediately
+        setTimeout(() => {
+             window.switchTab(activeBtn, 'home'); 
+        }, 100); 
+    }
+});
+
 // ==========================================
-// 4. AUTHENTICATION LOGIC
+// 4. AUTHENTICATION
 // ==========================================
 window.handleAuth = async () => {
     const email = document.getElementById('email').value;
@@ -105,219 +137,128 @@ window.handleGoogleAuth = async () => {
         closeAuthModal();
     } catch (error) {
         console.error(error);
-        alert("Google Login Failed. Note: If using Vercel, make sure you added the Vercel domain to Firebase Authorized Domains.");
+        alert("Google Login Error. Check Firebase Console.");
     }
 };
 
-// Listener: Runs whenever user logs in/out
 onAuthStateChanged(auth, async (user) => {
     const btn = document.getElementById('authBtn');
+    const label = document.getElementById('authLabel');
+    
     if (user) {
-        // User is logged in
-        btn.innerText = "Log Out";
-        btn.onclick = () => signOut(auth);
-        
-        // Check/Create Database Profile
+        if(label) label.innerText = "Profile";
         await checkAndCreateProfile(user);
-        
-        alert(`Welcome back, ${user.displayName || user.email}`);
     } else {
-        // User is logged out
-        btn.innerText = "Sign In";
-        btn.onclick = openAuthModal;
-        showPage('home'); 
+        if(label) label.innerText = "Login";
     }
 });
 
 // ==========================================
-// 5. DATABASE & SUBSCRIPTION LOGIC
+// 5. DATABASE & PURCHASING
 // ==========================================
-
-// Ensure user exists in DB
 async function checkAndCreateProfile(user) {
     const userRef = doc(db, "users", user.uid);
     const userSnap = await getDoc(userRef);
-
     if (!userSnap.exists()) {
-        await setDoc(userRef, {
-            email: user.email,
-            uid: user.uid,
-            expiryDate: null // No access initially
-        });
+        await setDoc(userRef, { email: user.email, uid: user.uid, expiryDate: null });
     }
 }
 
-// Check if subscription is active
 async function checkSubscription(userId) {
     const userRef = doc(db, "users", userId);
     const userSnap = await getDoc(userRef);
-
     if (userSnap.exists()) {
         const data = userSnap.data();
-        if (!data.expiryDate) return { hasAccess: false, daysLeft: 0 };
-
+        if (!data.expiryDate) return { hasAccess: false };
         const today = new Date();
         const expiry = new Date(data.expiryDate);
-        
-        const diffTime = expiry - today; 
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-
-        return diffDays > 0 ? { hasAccess: true, daysLeft: diffDays } : { hasAccess: false, daysLeft: 0 };
+        return (expiry - today) > 0 ? { hasAccess: true } : { hasAccess: false };
     }
-    return { hasAccess: false, daysLeft: 0 };
+    return { hasAccess: false };
 }
 
-// ==========================================
-// 6. COURSE & PURCHASING LOGIC
-// ==========================================
-
-// Render Course Cards
+// Render Courses
 const courseList = document.getElementById('courseList');
 if(courseList) {
     courseList.innerHTML = ""; 
     courses.forEach(c => {
         const div = document.createElement('div');
         div.className = 'course-card';
-        
         const featuresHtml = c.features.map(f => `<li><i class="fas fa-check-circle"></i> ${f}</li>`).join('');
-
         div.innerHTML = `
-            <div class="card-header">
-                <h3>${c.title}</h3>
-                <span class="badge">${c.price === 0 ? "FREE" : "3-Month Payment"}</span>
-            </div>
-            <p class="desc">${c.desc}</p>
-            <ul class="features">${featuresHtml}</ul>
-            <div class="card-footer">
-                <b class="price">₹${c.price}</b>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-buy" onclick="buyCourse('${c.id}')">
-                        ${c.price === 0 ? "Enroll" : "Buy"}
-                    </button>
-                    <button class="btn-gold" style="font-size:0.8rem;" onclick="openCourse('${c.id}')">
-                        <i class="fas fa-play"></i> Open
-                    </button>
-                </div>
-            </div>
-        `;
+            <div class="card-header"><h3>${c.title}</h3><span class="badge">${c.price === 0 ? "FREE" : "PAID"}</span></div>
+            <p class="desc">${c.desc}</p><ul class="features">${featuresHtml}</ul>
+            <div class="card-footer"><b class="price">₹${c.price}</b>
+            <div style="display:flex; gap:10px;">
+            <button class="btn-buy" onclick="buyCourse('${c.id}')">${c.price === 0 ? "Enroll" : "Buy"}</button>
+            <button class="btn-gold" style="font-size:0.8rem;" onclick="openCourse('${c.id}')"><i class="fas fa-play"></i> Open</button>
+            </div></div>`;
         courseList.appendChild(div);
     });
 }
 
-// Handle Purchase (WhatsApp)
 window.buyCourse = (courseId) => {
     const user = auth.currentUser;
-    if (!user) {
-        alert("Please Sign In to purchase.");
-        openAuthModal();
-        return;
-    }
-
+    if (!user) { alert("Please Sign In."); openAuthModal(); return; }
     const course = courses.find(c => c.id === courseId);
-    
-    // Free Course
-    if (course.price === 0) {
-        alert("This course is free! Just click 'Open'.");
-        return;
-    }
-
-    // Paid Course -> WhatsApp
-    const message = `Salam Kithademic!%0aI want to buy: *${course.title}*.%0aPrice: ₹${course.price}.%0aMy Email: ${user.email}%0aMy UID: ${user.uid}%0a%0aPlease send UPI details.`;
-    const whatsappUrl = `https://wa.me/${adminPhone}?text=${message}`;
-    window.open(whatsappUrl, '_blank');
+    const msg = `Salam! Buying: *${course.title}*. User: ${user.email}`;
+    window.open(`https://wa.me/${adminPhone}?text=${msg}`, '_blank');
 };
 
 // ==========================================
-// 7. CLASSROOM & PLAYER LOGIC
+// 6. CLASSROOM
 // ==========================================
 window.openCourse = async (courseId) => {
-    if (!auth.currentUser) {
-        alert("Please login first.");
-        openAuthModal();
-        return;
-    }
-
-    // 1. Check Subscription (Except for Free Courses)
+    if (!auth.currentUser) { alert("Login first."); openAuthModal(); return; }
+    
     const course = courses.find(c => c.id === courseId);
     if (course.price > 0) {
-        const subStatus = await checkSubscription(auth.currentUser.uid);
-        if (!subStatus.hasAccess) {
-            const renew = confirm("Subscription Expired/Inactive.\nRenew for 30 days via WhatsApp?");
-            if (renew) buyCourse(courseId);
+        const sub = await checkSubscription(auth.currentUser.uid);
+        if (!sub.hasAccess) {
+            if(confirm("Plan Expired. Renew?")) buyCourse(courseId);
             return;
         }
     }
 
-    // 2. Load Content
     const lessons = courseContent[courseId];
-    if (!lessons) return alert("Content upload in progress.");
+    if (!lessons) return alert("Coming Soon.");
 
     showPage('classroom');
-    
-    // 3. Build Playlist
-    const playlistDiv = document.getElementById('playlistItems');
-    playlistDiv.innerHTML = "";
-    
-    lessons.forEach((lesson, index) => {
-        const div = document.createElement('div');
-        div.className = `lesson-item`; 
-        div.innerHTML = `
-            <i class="fas fa-play-circle"></i>
-            <span>${index + 1}. ${lesson.title}</span>
-        `;
-        div.onclick = () => playVideo(lesson.videoId, lesson.title, div);
-        playlistDiv.appendChild(div);
+    const pl = document.getElementById('playlistItems');
+    pl.innerHTML = "";
+    lessons.forEach((l, i) => {
+        const d = document.createElement('div');
+        d.className = 'lesson-item';
+        d.innerHTML = `<i class="fas fa-play-circle"></i> <span>${i+1}. ${l.title}</span>`;
+        d.onclick = () => window.playVideo(l.videoId, l.title, d);
+        pl.appendChild(d);
     });
-
-    // Auto-play first video
-    if (lessons.length > 0) playVideo(lessons[0].videoId, lessons[0].title, playlistDiv.firstChild);
+    if(lessons.length) window.playVideo(lessons[0].videoId, lessons[0].title, pl.firstChild);
 };
 
-window.playVideo = (id, title, listElement) => {
-    document.getElementById('mainPlayer').src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`;
+window.playVideo = (id, title, el) => {
+    document.getElementById('mainPlayer').src = `https://www.youtube.com/embed/${id}?rel=0`;
     document.getElementById('videoTitle').innerText = title;
-    
-    document.querySelectorAll('.lesson-item').forEach(el => el.classList.remove('active'));
-    if(listElement) listElement.classList.add('active');
+    document.querySelectorAll('.lesson-item').forEach(x => x.classList.remove('active'));
+    if(el) el.classList.add('active');
 };
 
 // ==========================================
-// 8. ADMIN PANEL (SECRET)
+// 7. ADMIN TOOLS
 // ==========================================
+window.openAdminCheck = () => {
+    const password = prompt("Enter Admin Password:");
+    if (password === "syd@123%") { 
+        showPage('adminPanel');
+    } else if (password !== null) {
+        alert("Access Denied");
+    }
+};
+
 window.addMonth = async () => {
     const uid = document.getElementById('studentId').value;
-    if (!uid) return alert("Enter User UID");
-
-    const userRef = doc(db, "users", uid);
-    
-    // Add 30 Days from NOW
-    const futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + 30);
-
-    try {
-        await updateDoc(userRef, { expiryDate: futureDate.toISOString() });
-        document.getElementById('adminStatus').innerText = "Extended until: " + futureDate.toDateString();
-        alert("Success! User has access for 30 days.");
-    } catch (error) {
-        // If user doesn't exist yet in DB, create them
-        await setDoc(userRef, { expiryDate: futureDate.toISOString() });
-        document.getElementById('adminStatus').innerText = "Created & Active until: " + futureDate.toDateString();
-    }
+    if (!uid) return alert("Enter UID");
+    const future = new Date(); future.setDate(future.getDate() + 90);
+    await updateDoc(doc(db, "users", uid), { expiryDate: future.toISOString() });
+    alert("Success! 90 Days Added.");
 };
-
-// ==========================================
-// 9. SECRET ADMIN TRIGGER
-// ==========================================
-let tapCount = 0;
-document.querySelector('.logo').addEventListener('click', () => {
-    tapCount++;
-    if (tapCount === 5) {
-        const password = prompt("Enter Admin Password:");
-        if (password === "syd@123%") { // Change this to a real password
-            showPage('adminPanel');
-        }
-        tapCount = 0; // Reset
-    }
-    // Reset count if not clicked quickly enough
-    setTimeout(() => { tapCount = 0; }, 2000);
-});

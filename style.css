@@ -9,10 +9,6 @@
     --gold-border: rgba(238, 187, 93, 0.3);
     --glass-blur: 16px;
     --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-
-    /* PLYR THEME COLORS */
-    --plyr-color-main: #eebb5d; /* Progress bar becomes Gold */
-    --plyr-video-background: #000;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -146,17 +142,16 @@ body {
 }
 .price { font-size: 1.5rem; color: white; }
 
-/* --- CLASSROOM (Updated for Plyr) --- */
+/* --- CLASSROOM --- */
 .classroom-container {
     display: grid; grid-template-columns: 2fr 1fr; gap: 25px;
     width: 95%; max-width: 1300px; margin: 0 auto 20px auto; text-align: left;
 }
 .video-wrapper {
-    /* Plyr handles aspect ratio, just styling the container */
-    border-radius: 16px; overflow: hidden; 
-    border: 1px solid var(--glass-border);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    position: relative; padding-bottom: 56.25%; background: #000;
+    border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border);
 }
+.video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 .video-area h2 { margin-top: 20px; color: var(--accent-gold); }
 .playlist-area {
     background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));

@@ -58,7 +58,7 @@ const courseContent = {
 };
 
 // ==========================================
-// 3. UI NAVIGATION (BUBBLE FIX HERE)
+// 3. UI NAVIGATION
 // ==========================================
 let isLoginMode = true;
 
@@ -69,7 +69,18 @@ window.showPage = (pageId) => {
 };
 
 window.openAuthModal = () => document.getElementById('authModal').classList.remove('hidden');
-window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
+
+// --- FIX: RESET BUBBLE TO HOME ON CLOSE ---
+window.closeAuthModal = () => {
+    document.getElementById('authModal').classList.add('hidden');
+    
+    // Find the Home button (first nav item)
+    const homeBtn = document.querySelector('.nav-item'); 
+    if(homeBtn) {
+        // Move bubble back to home without changing page content
+        window.switchTab(homeBtn, null); 
+    }
+};
 
 window.toggleAuthMode = () => {
     isLoginMode = !isLoginMode;
@@ -79,35 +90,28 @@ window.toggleAuthMode = () => {
 
 // --- BUBBLE ANIMATION ---
 window.switchTab = (element, pageId) => {
+    // 1. Switch Page Content (if pageId is provided)
     if(pageId) showPage(pageId);
 
+    // 2. Handle Bubble Animation
     const bubble = document.getElementById('navBubble');
-    const nav = document.querySelector('.bottom-nav');
     
-    // Calculate Position
-    const navRect = nav.getBoundingClientRect();
-    const itemRect = element.getBoundingClientRect();
-    const offsetLeft = itemRect.left - navRect.left;
-    
-    // Move Bubble
-    bubble.style.width = `${itemRect.width}px`;
-    bubble.style.transform = `translateX(${offsetLeft}px)`;
-    bubble.classList.add('initialized'); // Makes it visible
+    // Move Bubble to match the clicked element
+    bubble.style.width = `${element.offsetWidth}px`;
+    bubble.style.transform = `translateX(${element.offsetLeft}px)`;
+    bubble.classList.add('initialized'); 
 
-    // Set Active State
+    // 3. Update Active State
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     element.classList.add('active');
 };
 
-// --- INITIALIZATION FIX ---
+// --- INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", () => {
-    // Find the item that is ALREADY active in HTML (which is Home)
     const activeBtn = document.querySelector('.nav-item.active'); 
-
     if(activeBtn) {
-        // Trigger the bubble calculation immediately
         setTimeout(() => {
-             window.switchTab(activeBtn, 'home'); 
+             window.switchTab(activeBtn, null); 
         }, 100); 
     }
 });
@@ -142,16 +146,46 @@ window.handleGoogleAuth = async () => {
 };
 
 onAuthStateChanged(auth, async (user) => {
-    const btn = document.getElementById('authBtn');
+    const navIconDiv = document.getElementById('navAuthIcon');
     const label = document.getElementById('authLabel');
-    
+    const loginView = document.getElementById('loginContent');
+    const profileView = document.getElementById('profileContent');
+
     if (user) {
+        // Logged In
+        const photoURL = user.photoURL || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+        
+        if(navIconDiv) navIconDiv.innerHTML = `<img src="${photoURL}" class="nav-user-img" alt="User">`;
         if(label) label.innerText = "Profile";
+
+        if(loginView) loginView.classList.add('hidden');
+        if(profileView) {
+            profileView.classList.remove('hidden');
+            document.getElementById('userProfileImg').src = photoURL;
+            document.getElementById('userName').innerText = user.displayName || "Student";
+            document.getElementById('userEmail').innerText = user.email;
+        }
+
         await checkAndCreateProfile(user);
+        
     } else {
+        // Logged Out
+        if(navIconDiv) navIconDiv.innerHTML = `<i class="fas fa-user"></i>`;
         if(label) label.innerText = "Login";
+
+        if(loginView) loginView.classList.remove('hidden');
+        if(profileView) profileView.classList.add('hidden');
+        
+        showPage('home'); 
     }
 });
+
+window.signOut = (authInstance) => {
+    signOut(authInstance).then(() => {
+        closeAuthModal(); // This will triggers the bubble reset
+        alert("Logged Out Successfully");
+    });
+};
 
 // ==========================================
 // 5. DATABASE & PURCHASING
@@ -186,7 +220,7 @@ if(courseList) {
         div.className = 'course-card';
         const featuresHtml = c.features.map(f => `<li><i class="fas fa-check-circle"></i> ${f}</li>`).join('');
         div.innerHTML = `
-            <div class="card-header"><h3>${c.title}</h3><span class="badge">${c.price === 0 ? "FREE" : "PAID"}</span></div>
+            <div class="card-header"><h3>${c.title}</h3><span class="badge">${c.price === 0 ? "FREE" : "3-Month Plan"}</span></div>
             <p class="desc">${c.desc}</p><ul class="features">${featuresHtml}</ul>
             <div class="card-footer"><b class="price">₹${c.price}</b>
             <div style="display:flex; gap:10px;">
@@ -201,12 +235,12 @@ window.buyCourse = (courseId) => {
     const user = auth.currentUser;
     if (!user) { alert("Please Sign In."); openAuthModal(); return; }
     const course = courses.find(c => c.id === courseId);
-    const msg = `Salam! Buying: *${course.title}*. User: ${user.email}`;
+    const msg = `Salam Kithademic!%0aI want to buy: *${course.title}*.%0aPrice: ₹${course.price}.%0aMy Email: ${user.email}%0aMy UID: ${user.uid}%0a%0aPlease send UPI details.`;
     window.open(`https://wa.me/${adminPhone}?text=${msg}`, '_blank');
 };
 
 // ==========================================
-// 6. CLASSROOM
+// 6. CLASSROOM & ADMIN
 // ==========================================
 window.openCourse = async (courseId) => {
     if (!auth.currentUser) { alert("Login first."); openAuthModal(); return; }
@@ -243,9 +277,7 @@ window.playVideo = (id, title, el) => {
     if(el) el.classList.add('active');
 };
 
-// ==========================================
-// 7. ADMIN TOOLS
-// ==========================================
+// Admin
 window.openAdminCheck = () => {
     const password = prompt("Enter Admin Password:");
     if (password === "syd@123%") { 
@@ -258,7 +290,7 @@ window.openAdminCheck = () => {
 window.addMonth = async () => {
     const uid = document.getElementById('studentId').value;
     if (!uid) return alert("Enter UID");
-    const future = new Date(); future.setDate(future.getDate() + 90);
+    const future = new Date(); future.setDate(future.getDate() + 30);
     await updateDoc(doc(db, "users", uid), { expiryDate: future.toISOString() });
-    alert("Success! 90 Days Added.");
+    alert("Success! 30 Days Added.");
 };

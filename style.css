@@ -9,6 +9,10 @@
     --gold-border: rgba(238, 187, 93, 0.3);
     --glass-blur: 16px;
     --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+
+    /* PLYR THEME COLORS */
+    --plyr-color-main: #eebb5d; /* Progress bar becomes Gold */
+    --plyr-video-background: #000;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -97,7 +101,7 @@ body {
 }
 .hero-content h1 { font-family: 'Amiri', serif; font-size: 2.5rem; color: var(--accent-gold); margin-bottom: 10px; }
 .hero-content h2 { font-size: 3rem; margin-bottom: 10px; }
-.gold-text { background: var(--accent-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.gold-text { background: linear-gradient(to right, #eebb5d, #fff, #eebb5d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
 /* --- BUTTONS --- */
 .btn-gold {
@@ -142,16 +146,17 @@ body {
 }
 .price { font-size: 1.5rem; color: white; }
 
-/* --- CLASSROOM --- */
+/* --- CLASSROOM (Updated for Plyr) --- */
 .classroom-container {
     display: grid; grid-template-columns: 2fr 1fr; gap: 25px;
     width: 95%; max-width: 1300px; margin: 0 auto 20px auto; text-align: left;
 }
 .video-wrapper {
-    position: relative; padding-bottom: 56.25%; background: #000;
-    border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border);
+    /* Plyr handles aspect ratio, just styling the container */
+    border-radius: 16px; overflow: hidden; 
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
-.video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 .video-area h2 { margin-top: 20px; color: var(--accent-gold); }
 .playlist-area {
     background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -172,13 +177,12 @@ body {
 /* --- MODAL --- */
 .modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000;
-    backdrop-filter: blur(10px);
+    background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 2000;
+    backdrop-filter: blur(5px);
 }
 .modal-content {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(6px);
-    padding: 40px; border-radius: 40px; border: 0px solid var(--gold-border);
+    background: rgba(10, 30, 25, 0.95);
+    padding: 40px; border-radius: 20px; border: 1px solid var(--gold-border);
     width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 20px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.5);
 }

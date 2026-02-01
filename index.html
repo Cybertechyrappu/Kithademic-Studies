@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,83 +10,106 @@
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="logo">
-            <i class="fas fa-book-quran"></i> Kithademic
-        </div>
-        <div class="nav-links">
-            <a href="#" onclick="showPage('home')">Home</a>
-            <a href="#" onclick="showPage('courses')">Courses</a>
-            <button id="authBtn" class="btn-gold" onclick="openAuthModal()">Sign In</button>
-        </div>
-    </nav>
+<div class="top-brand">
+    <div class="logo">
+        <i class="fas fa-book-quran"></i> Kithademic
+    </div>
+    
+    <button class="admin-btn-top" onclick="openAdminCheck()">
+        <i class="fas fa-user-shield"></i>
+    </button>
+</div>
+
 
     <div class="parallax-bg"></div>
 
     <main id="app">
+        
         <section id="home" class="page active">
             <div class="hero-content">
                 <h1 class="arabic-font">بِسْمِ ٱللَّٰهِ</h1>
                 <h2>Welcome to <span class="gold-text">Kithademic Studies</span></h2>
-                <p>Knowledge is the light of the heart. Excellence in Education.</p>
-                <button class="btn-primary" onclick="showPage('courses')">Start Learning</button>
+                <p>Knowledge is the light of the heart.<br>Excellence in Islamic & Academic Education.</p>
+                <button class="btn-primary" onclick="switchTab(document.querySelectorAll('.nav-item')[1], 'courses')">Start Learning</button>
             </div>
         </section>
 
         <section id="courses" class="page hidden">
-            <h2 class="section-title">Our Premium Courses</h2>
+            <h2 class="section-title"><span class="gold-text">Premium Courses</span></h2>
             <div class="course-grid" id="courseList">
                 </div>
         </section>
-        <section id="classroom" class="page hidden">
-    <div class="classroom-container">
-        <div class="video-area">
-            <div class="video-wrapper">
-                <iframe id="mainPlayer" src="" frameborder="0" allowfullscreen></iframe>
-            </div>
-            <h2 id="videoTitle">Select a Class to Start</h2>
-            <p id="videoDesc">Description will appear here.</p>
-        </div>
 
-        <div class="playlist-area">
-            <div class="playlist-header">
-                <h3>Course Content</h3>
-                <span id="progressText">0% Complete</span>
-            </div>
-            <div id="playlistItems" class="playlist-items">
+        <section id="classroom" class="page hidden">
+            <div class="classroom-container">
+                <div class="video-area">
+                    <div class="video-wrapper">
+                        <iframe id="mainPlayer" src="" frameborder="0" allowfullscreen></iframe>
+                    </div>
+                    <h2 id="videoTitle">Select a Class to Start</h2>
                 </div>
-        </div>
-    </div>
-    <button class="btn-primary" onclick="showPage('courses')">← Back to Courses</button>
-</section>
+
+                <div class="playlist-area">
+                    <div class="playlist-header">
+                        <h3>Syllabus</h3>
+                        <span id="progressText" style="color:var(--accent-gold)">Classroom</span>
+                    </div>
+                    <div id="playlistItems" class="playlist-items">
+                        </div>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="switchTab(document.querySelectorAll('.nav-item')[1], 'courses')">Back to Courses</button>
+        </section>
+
+        <section id="adminPanel" class="page hidden">
+            <h2>Admin Dashboard</h2>
+            <div class="modal-content">
+                <input type="text" id="studentId" placeholder="Paste User UID here">
+                <button class="btn-primary" onclick="addMonth()">Add 30 Days Access</button>
+                <p id="adminStatus" style="margin-top:10px; color:var(--accent-gold);"></p>
+            </div>
+        </section>
 
     </main>
-    <section id="adminPanel" class="page hidden">
-    <h2>Admin Dashboard</h2>
-    <div class="modal-content" style="background: rgba(0,0,0,0.5);">
-        <input type="text" id="studentId" placeholder="Paste User UID here">
-        <button class="btn-primary" onclick="addMonth()">Add 30 Days Access</button>
-        <p id="adminStatus"></p>
-    </div>
-</section>
 
+    <nav class="bottom-nav">
+        <div id="navBubble" class="nav-indicator"></div>
+
+        <a href="#" class="nav-item active" onclick="switchTab(this, 'home')">
+            <i class="fas fa-home"></i>
+            <span class="label">Home</span>
+        </a>
+
+        <a href="#" class="nav-item" onclick="switchTab(this, 'courses')">
+            <i class="fas fa-book-open"></i>
+            <span class="label">Courses</span>
+        </a>
+
+        <a href="#" class="nav-item" onclick="openAuthModal()">
+            <i class="fas fa-user"></i>
+            <span class="label" id="authLabel">Login</span>
+        </a>
+    </nav>
 
     <div id="authModal" class="modal hidden">
         <div class="modal-content">
-            <span class="close" onclick="closeAuthModal()">&times;</span>
+            <span class="close" onclick="closeAuthModal()" style="float:right; cursor:pointer; font-size:1.5rem;">&times;</span>
             <h2 id="modalTitle">Student Portal</h2>
+            
             <input type="email" id="email" placeholder="Email Address">
             <input type="password" id="password" placeholder="Password">
-            <button class="btn-primary" onclick="handleAuth()">Enter</button>
-            <p id="toggleAuth" onclick="toggleAuthMode()">New here? Create Account</p>
-            <div class="auth-divider">
-    <span>OR</span>
-</div>
+            
+            <button class="btn-primary" onclick="handleAuth()" style="width:100%">Enter</button>
+            
+            <p id="toggleAuth" onclick="toggleAuthMode()" style="margin-top:10px; cursor:pointer; font-size:0.8rem; text-align:center;">
+                New here? Create Account
+            </p>
+            
+            <div class="auth-divider"><span>OR</span></div>
 
-<button class="btn-google" onclick="handleGoogleAuth()">
-    <i class="fab fa-google"></i> Continue with Google
-</button>
-
+            <button class="btn-google" onclick="handleGoogleAuth()">
+                <i class="fab fa-google"></i> Continue with Google
+            </button>
         </div>
     </div>
 

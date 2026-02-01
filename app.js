@@ -4,8 +4,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import { 
     getAuth, 
-    signInWithEmailAndPassword, 
-    createUserWithEmailAndPassword, 
     onAuthStateChanged, 
     signOut, 
     GoogleAuthProvider, 
@@ -60,8 +58,6 @@ const courseContent = {
 // ==========================================
 // 3. UI NAVIGATION
 // ==========================================
-let isLoginMode = true;
-
 window.showPage = (pageId) => {
     document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
     const target = document.getElementById(pageId);
@@ -80,12 +76,6 @@ window.closeAuthModal = () => {
         // Move bubble back to home
         window.switchTab(homeBtn, null); 
     }
-};
-
-window.toggleAuthMode = () => {
-    isLoginMode = !isLoginMode;
-    document.getElementById('modalTitle').innerText = isLoginMode ? "Student Login" : "Student Registration";
-    document.getElementById('toggleAuth').innerText = isLoginMode ? "New here? Create Account" : "Already have an account? Login";
 };
 
 // --- BUBBLE ANIMATION ---
@@ -117,22 +107,8 @@ document.addEventListener("DOMContentLoaded", () => {
 // ==========================================
 // 4. AUTHENTICATION
 // ==========================================
-window.handleAuth = async () => {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
 
-    try {
-        if (isLoginMode) {
-            await signInWithEmailAndPassword(auth, email, password);
-        } else {
-            await createUserWithEmailAndPassword(auth, email, password);
-        }
-        closeAuthModal();
-    } catch (error) {
-        alert(error.message);
-    }
-};
-
+// Google Login Only
 window.handleGoogleAuth = async () => {
     try {
         await signInWithPopup(auth, googleProvider);
@@ -143,7 +119,7 @@ window.handleGoogleAuth = async () => {
     }
 };
 
-// --- AUTH LISTENER & PROFILE SWITCHING ---
+// --- AUTH LISTENER ---
 onAuthStateChanged(auth, async (user) => {
     const navIconDiv = document.getElementById('navAuthIcon');
     const label = document.getElementById('authLabel');
@@ -179,12 +155,11 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// --- FIX: GLOBAL SIGN OUT FUNCTION ---
+// --- GLOBAL SIGN OUT ---
 window.handleSignOut = () => {
     signOut(auth).then(() => {
         closeAuthModal();
         alert("Logged Out Successfully");
-        // Force reload to reset state cleanly
         window.location.reload();
     }).catch((error) => {
         alert("Error: " + error.message);
@@ -294,7 +269,7 @@ window.openAdminCheck = () => {
 window.addMonth = async () => {
     const uid = document.getElementById('studentId').value;
     if (!uid) return alert("Enter UID");
-    const future = new Date(); future.setDate(future.getDate() + 30);
+    const future = new Date(); future.setDate(future.getDate() + 90);
     await updateDoc(doc(db, "users", uid), { expiryDate: future.toISOString() });
-    alert("Success! 30 Days Added.");
+    alert("Success! 90 Days Added.");
 };

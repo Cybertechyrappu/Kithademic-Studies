@@ -13,7 +13,7 @@
 
     <div class="top-brand">
         <div class="logo">
-            <i class="fas fa-book-quran"></i>
+            <i class="fas fa-book-quran"></i> Kithademic
         </div>
         <button class="admin-btn-top" onclick="openAdminCheck()">
             <i class="fas fa-user-shield"></i>
@@ -98,9 +98,18 @@
             <div id="profileContent" class="hidden" style="text-align:center;">
                 <img id="userProfileImg" src="" alt="Profile" class="big-profile-img">
                 <h2 id="userName" class="gold-text">Student Name</h2>
-                <p id="userEmail" style="color:#aaa; margin-bottom:20px;">student@gmail.com</p>
-                
-                <div class="profile-actions" style="display:flex; flex-direction:column; gap:10px;">
+                <p id="userEmail" style="color:#aaa; margin-bottom:15px;">student@gmail.com</p>
+
+                <div class="history-container">
+                    <h4 style="color:var(--accent-gold); margin-bottom:10px; text-align:left; font-size: 0.9rem;">
+                        <i class="fas fa-history"></i> Continue Watching
+                    </h4>
+                    <div id="historyList" class="history-list">
+                        <p style="color:#666; font-size:0.8rem;">Loading history...</p>
+                    </div>
+                </div>
+
+                <div class="profile-actions" style="display:flex; flex-direction:column; gap:10px; margin-top: 15px;">
                     <button id="installBtn" class="btn-primary" onclick="installApp()" style="display:none; border-color:var(--accent-gold); color:var(--accent-gold);">
                         <i class="fas fa-download"></i> Install App
                     </button>

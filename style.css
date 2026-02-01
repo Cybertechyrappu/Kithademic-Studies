@@ -97,7 +97,7 @@ body {
 }
 .hero-content h1 { font-family: 'Amiri', serif; font-size: 2.5rem; color: var(--accent-gold); margin-bottom: 10px; }
 .hero-content h2 { font-size: 3rem; margin-bottom: 10px; }
-.gold-text { background: linear-gradient(to right, #eebb5d, #fff, #eebb5d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.gold-text { background: var(--accent-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
 /* --- BUTTONS --- */
 .btn-gold {
@@ -169,38 +169,20 @@ body {
 .lesson-item:hover { background: rgba(255, 255, 255, 0.08); }
 .lesson-item.active { background: rgba(238, 187, 93, 0.15); border-left: 4px solid var(--accent-gold); }
 
-/* --- MODAL & INPUTS --- */
+/* --- MODAL --- */
 .modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 2000;
-    backdrop-filter: blur(5px);
+    background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 2000;
+    backdrop-filter: blur(10px);
 }
 .modal-content {
-    background: rgba(10, 30, 25, 0.95);
-    padding: 40px; border-radius: 20px; border: 1px solid var(--gold-border);
-    width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 25px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(6px);
+    padding: 40px; border-radius: 40px; border: 0px solid var(--gold-border);
+    width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 20px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.5);
 }
 
-/* Modern Input Groups */
-.input-group { position: relative; width: 100%; }
-.input-group input {
-    width: 100%; padding: 15px; background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px;
-    color: var(--text-light); font-size: 1rem; outline: none; transition: 0.3s;
-}
-.input-group label {
-    position: absolute; top: 50%; left: 15px; transform: translateY(-50%);
-    color: #aaa; pointer-events: none; transition: 0.3s ease all; font-size: 1rem;
-}
-.input-group input:focus ~ label, .input-group input:valid ~ label {
-    top: 0; left: 10px; font-size: 0.8rem; padding: 0 5px;
-    background: rgba(10, 30, 25, 0.95); color: var(--accent-gold);
-}
-.input-group input:focus { border-color: var(--accent-gold); box-shadow: 0 0 15px rgba(238, 187, 93, 0.2); }
-
-.auth-divider { margin: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); position:relative; height:1px; text-align:center; }
-.auth-divider span { background: #08201a; position: relative; top: -10px; padding: 0 10px; color: #aaa; font-size:0.8rem;}
 .btn-google {
     background: white; color: #333; padding: 12px; border-radius: 50px;
     font-weight: bold; width: 100%; border:none;

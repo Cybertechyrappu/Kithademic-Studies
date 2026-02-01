@@ -3,21 +3,12 @@
 // ==========================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import { 
-    getAuth, 
-    onAuthStateChanged, 
-    signOut, 
-    GoogleAuthProvider, 
-    signInWithPopup 
+    getAuth, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup 
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { 
-    getFirestore, 
-    doc, 
-    getDoc, 
-    setDoc, 
-    updateDoc 
+    getFirestore, doc, getDoc, setDoc, updateDoc 
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-// --- CONFIGURATION ---
 const firebaseConfig = {
     apiKey: "AIzaSyDm97rTDsP1sELznlVKLogPBkMiy0fpc9c",
     authDomain: "kithademic-studies.firebaseapp.com",
@@ -34,8 +25,18 @@ const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 const adminPhone = "919526755210"; 
 
+// --- INITIALIZE MODERN PLAYER ---
+// This creates the player instance
+let player;
+document.addEventListener('DOMContentLoaded', () => {
+    player = new Plyr('#player', {
+        controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'],
+        youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
+    });
+});
+
 // ==========================================
-// 2. DATA (COURSES)
+// 2. DATA
 // ==========================================
 const courses = [
     { 
@@ -66,60 +67,40 @@ window.showPage = (pageId) => {
 
 window.openAuthModal = () => document.getElementById('authModal').classList.remove('hidden');
 
-// --- FIX: RESET BUBBLE TO HOME ON CLOSE ---
 window.closeAuthModal = () => {
     document.getElementById('authModal').classList.add('hidden');
-    
-    // Find the Home button (first nav item)
     const homeBtn = document.querySelector('.nav-item'); 
-    if(homeBtn) {
-        // Move bubble back to home
-        window.switchTab(homeBtn, null); 
-    }
+    if(homeBtn) window.switchTab(homeBtn, null); 
 };
 
-// --- BUBBLE ANIMATION ---
 window.switchTab = (element, pageId) => {
     if(pageId) showPage(pageId);
-
     const bubble = document.getElementById('navBubble');
-    
-    // Calculate Position
     bubble.style.width = `${element.offsetWidth}px`;
     bubble.style.transform = `translateX(${element.offsetLeft}px)`;
     bubble.classList.add('initialized'); 
-
-    // Update Active State
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     element.classList.add('active');
 };
 
-// --- INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", () => {
     const activeBtn = document.querySelector('.nav-item.active'); 
-    if(activeBtn) {
-        setTimeout(() => {
-             window.switchTab(activeBtn, null); 
-        }, 100); 
-    }
+    if(activeBtn) setTimeout(() => window.switchTab(activeBtn, null), 100); 
 });
 
 // ==========================================
 // 4. AUTHENTICATION
 // ==========================================
-
-// Google Login Only
 window.handleGoogleAuth = async () => {
     try {
         await signInWithPopup(auth, googleProvider);
         closeAuthModal();
     } catch (error) {
         console.error(error);
-        alert("Google Login Error. Check Firebase Console.");
+        alert("Login Error: " + error.message);
     }
 };
 
-// --- AUTH LISTENER ---
 onAuthStateChanged(auth, async (user) => {
     const navIconDiv = document.getElementById('navAuthIcon');
     const label = document.getElementById('authLabel');
@@ -127,12 +108,9 @@ onAuthStateChanged(auth, async (user) => {
     const profileView = document.getElementById('profileContent');
 
     if (user) {
-        // Logged In
         const photoURL = user.photoURL || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-        
         if(navIconDiv) navIconDiv.innerHTML = `<img src="${photoURL}" class="nav-user-img" alt="User">`;
         if(label) label.innerText = "Profile";
-
         if(loginView) loginView.classList.add('hidden');
         if(profileView) {
             profileView.classList.remove('hidden');
@@ -140,41 +118,31 @@ onAuthStateChanged(auth, async (user) => {
             document.getElementById('userName').innerText = user.displayName || "Student";
             document.getElementById('userEmail').innerText = user.email;
         }
-
         await checkAndCreateProfile(user);
-        
     } else {
-        // Logged Out
         if(navIconDiv) navIconDiv.innerHTML = `<i class="fas fa-user"></i>`;
         if(label) label.innerText = "Login";
-
         if(loginView) loginView.classList.remove('hidden');
         if(profileView) profileView.classList.add('hidden');
-        
         showPage('home'); 
     }
 });
 
-// --- GLOBAL SIGN OUT ---
 window.handleSignOut = () => {
     signOut(auth).then(() => {
         closeAuthModal();
         alert("Logged Out Successfully");
         window.location.reload();
-    }).catch((error) => {
-        alert("Error: " + error.message);
-    });
+    }).catch((error) => alert("Error: " + error.message));
 };
 
 // ==========================================
-// 5. DATABASE & PURCHASING
+// 5. DATABASE
 // ==========================================
 async function checkAndCreateProfile(user) {
     const userRef = doc(db, "users", user.uid);
     const userSnap = await getDoc(userRef);
-    if (!userSnap.exists()) {
-        await setDoc(userRef, { email: user.email, uid: user.uid, expiryDate: null });
-    }
+    if (!userSnap.exists()) await setDoc(userRef, { email: user.email, uid: user.uid, expiryDate: null });
 }
 
 async function checkSubscription(userId) {
@@ -218,12 +186,8 @@ window.buyCourse = (courseId) => {
     window.open(`https://wa.me/${adminPhone}?text=${msg}`, '_blank');
 };
 
-// ==========================================
-// 6. CLASSROOM & ADMIN
-// ==========================================
 window.openCourse = async (courseId) => {
     if (!auth.currentUser) { alert("Login first."); openAuthModal(); return; }
-    
     const course = courses.find(c => c.id === courseId);
     if (course.price > 0) {
         const sub = await checkSubscription(auth.currentUser.uid);
@@ -232,7 +196,6 @@ window.openCourse = async (courseId) => {
             return;
         }
     }
-
     const lessons = courseContent[courseId];
     if (!lessons) return alert("Coming Soon.");
 
@@ -249,27 +212,35 @@ window.openCourse = async (courseId) => {
     if(lessons.length) window.playVideo(lessons[0].videoId, lessons[0].title, pl.firstChild);
 };
 
+// --- MODIFIED PLAY VIDEO (USES PLYR) ---
 window.playVideo = (id, title, el) => {
-    document.getElementById('mainPlayer').src = `https://www.youtube.com/embed/${id}?rel=0`;
+    // Update Plyr Source
+    if(player) {
+        player.source = {
+            type: 'video',
+            sources: [
+                { src: id, provider: 'youtube' },
+            ],
+        };
+        // Auto play (optional)
+        player.play();
+    }
+    
     document.getElementById('videoTitle').innerText = title;
     document.querySelectorAll('.lesson-item').forEach(x => x.classList.remove('active'));
     if(el) el.classList.add('active');
 };
 
-// Admin
 window.openAdminCheck = () => {
     const password = prompt("Enter Admin Password:");
-    if (password === "syd@123%") { 
-        showPage('adminPanel');
-    } else if (password !== null) {
-        alert("Access Denied");
-    }
+    if (password === "syd@123%") { showPage('adminPanel'); } 
+    else if (password !== null) { alert("Access Denied"); }
 };
 
 window.addMonth = async () => {
     const uid = document.getElementById('studentId').value;
     if (!uid) return alert("Enter UID");
-    const future = new Date(); future.setDate(future.getDate() + 90);
+    const future = new Date(); future.setDate(future.getDate() + 30);
     await updateDoc(doc(db, "users", uid), { expiryDate: future.toISOString() });
-    alert("Success! 90 Days Added.");
+    alert("Success! 30 Days Added.");
 };

@@ -99,11 +99,7 @@ onAuthStateChanged(auth, async (user) => {
     const loginView = document.getElementById('loginContent');
     const profileView = document.getElementById('profileContent');
 
-    // 1. Render Public Courses
     await renderCourses(user);
-
-    // 2. Render My Courses (Homepage)
-    await renderMyCourses(user);
 
     if (user) {
         // Logged In
@@ -134,11 +130,6 @@ onAuthStateChanged(auth, async (user) => {
         
         if(loginView) loginView.classList.remove('hidden');
         if(profileView) profileView.classList.add('hidden');
-        
-        // Hide My Courses Section
-        const myCoursesSection = document.getElementById('myCoursesSection');
-        if(myCoursesSection) myCoursesSection.classList.add('hidden');
-        
         showPage('home'); 
     }
 });
@@ -210,51 +201,6 @@ async function renderCourses(user) {
                 ${actionButton}
             </div></div>`;
         courseList.appendChild(div);
-    });
-}
-
-// NEW: RENDER MY COURSES ON HOME
-async function renderMyCourses(user) {
-    const section = document.getElementById('myCoursesSection');
-    const list = document.getElementById('myCoursesList');
-    
-    if (!section || !list) return;
-
-    // 1. Safety Check: User must be logged in
-    if (!user) {
-        section.classList.add('hidden');
-        return;
-    }
-
-    // 2. Check Subscription Status
-    const sub = await checkSubscription(user.uid);
-    
-    // 3. If NO access, hide the section
-    if (!sub.hasAccess) {
-        section.classList.add('hidden');
-        return;
-    }
-
-    // 4. If ACCESS GRANTED, show the section and render cards
-    section.classList.remove('hidden');
-    list.innerHTML = "";
-
-    courses.forEach(c => {
-        // Show paid courses in "My Learning" if they have access
-        const div = document.createElement('div');
-        div.className = 'course-card';
-        
-        div.innerHTML = `
-            <div class="card-header" style="background:rgba(238, 187, 93, 0.1);">
-                <h3>${c.title}</h3>
-                <span class="badge" style="background:#4CAF50; color:white;">Active</span>
-            </div>
-            <div class="card-footer" style="justify-content:center; padding:15px;">
-                <button class="btn-gold" style="width:100%" onclick="openCourse('${c.id}')">
-                    <i class="fas fa-play"></i> Continue Learning
-                </button>
-            </div>`;
-        list.appendChild(div);
     });
 }
 

@@ -81,7 +81,7 @@ window.openAuthModal = () => document.getElementById('authModal').classList.remo
 // --- FIX: GO HOME ON CLOSE ---
 window.closeAuthModal = () => {
     document.getElementById('authModal').classList.add('hidden');
-    
+
     // Find the Home Button (Index 0) and click it virtually
     const homeBtn = document.querySelectorAll('.nav-item')[0];
     if (homeBtn) {
@@ -102,7 +102,7 @@ window.switchTab = (element, pageId) => {
     }
 
     if(pageId) showPage(pageId);
-    
+
     if (element) {
         const bubble = document.getElementById('navBubble');
         if(bubble) {
@@ -118,7 +118,7 @@ window.switchTab = (element, pageId) => {
 document.addEventListener("DOMContentLoaded", () => {
     const activeBtn = document.querySelector('.nav-item.active'); 
     if(activeBtn) setTimeout(() => window.switchTab(activeBtn, null), 100); 
-    
+
     // Back Button Logic
     const backBtn = document.getElementById('backToCoursesBtn');
     if(backBtn) {
@@ -189,8 +189,22 @@ async function checkAndCreateProfile(user) {
     try {
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
-        if (!userSnap.exists()) await setDoc(userRef, { email: user.email, uid: user.uid, expiryDate: null });
-    } catch(e) { console.error(e); }
+        
+        // 1. Prepare Data (Get Name from Google)
+        const userData = { 
+            displayName: user.displayName || "Student", 
+            email: user.email, 
+            uid: user.uid 
+        };
+
+        if (!userSnap.exists()) {
+            // 2. New User: Create Profile
+            await setDoc(userRef, { ...userData, expiryDate: null });
+        } else {
+            // 3. Existing User: UPDATE Name (Crucial for Admin Panel to see names)
+            await updateDoc(userRef, { displayName: userData.displayName, email: userData.email });
+        }
+    } catch(e) { console.error("Profile Error:", e); }
 }
 
 async function checkSubscription(userId) {
@@ -211,7 +225,7 @@ async function checkSubscription(userId) {
 async function renderCourses(user) {
     const courseList = document.getElementById('courseList');
     if(!courseList) return;
-    
+
     let hasAccess = false;
     if (user) {
         courseList.innerHTML = '<p style="color:#aaa; text-align:center;">Checking subscription...</p>';
@@ -220,17 +234,17 @@ async function renderCourses(user) {
             hasAccess = sub.hasAccess; 
         } catch(e){}
     }
-    
+
     courseList.innerHTML = ""; 
-    
+
     courses.forEach(c => {
         const div = document.createElement('div');
         div.className = 'course-card';
         const featuresHtml = c.features.map(f => `<li><i class="fas fa-check-circle"></i> ${f}</li>`).join('');
-        
-        // --- BUTTON LOGIC CHANGED HERE ---
+
+        // --- BUTTON LOGIC ---
         let actionButton = "";
-        const price = parseInt(c.price); // Convert to number for checking
+        const price = parseInt(c.price);
 
         // If price is 0 OR user has bought it -> Show "Open"
         if (price === 0 || hasAccess) {
@@ -246,7 +260,7 @@ async function renderCourses(user) {
         div.innerHTML = `
             <div class="card-header">
                 <h3>${c.title}</h3>
-                <span class="badge" style="${price === 0 ? 'background:#28745;' : ''}">${badgeDisplay}</span>
+                <span class="badge" style="${price === 0 ? 'background:#28a745;' : ''}">${badgeDisplay}</span>
             </div>
             <p class="desc">${c.desc}</p>
             <ul class="features">${featuresHtml}</ul>
@@ -262,19 +276,19 @@ async function renderCourses(user) {
 window.buyCourse = (courseId) => {
     const user = auth.currentUser;
     if (!user) { alert("Please Sign In."); openAuthModal(); return; }
-    
+
     const course = courses.find(c => c.id === courseId);
     const userName = user.displayName || "Student";
-    
+
     const msg = `${userName}%0aI want to buy: *${course.title}*.%0aPrice: ₹${course.price}.%0aMy Email: ${user.email}%0aMy UID: ${user.uid}%0a%0aPlease send UPI details.`;
-    
+
     window.open(`https://wa.me/${adminPhone}?text=${msg}`, '_blank');
 };
 
 window.openCourse = async (courseId) => {
-    // 1. CHECK LOGIN (Required for everyone, even free courses)
+    // 1. CHECK LOGIN (Required for everyone)
     if (!auth.currentUser) { alert("Please login to continue."); openAuthModal(); return; }
-    
+
     const course = courses.find(c => c.id === courseId);
     const price = parseInt(course.price);
 
@@ -286,11 +300,11 @@ window.openCourse = async (courseId) => {
             return; 
         }
     }
-    
+
     // Switch to Classroom
     document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
     document.getElementById('classroom').classList.remove('hidden');
-    
+
     const lessons = courseContent[courseId];
     if (!lessons) { alert("No content added yet."); return; }
 
@@ -309,7 +323,7 @@ window.openCourse = async (courseId) => {
 window.playVideo = (id, title, el) => {
     const wrapper = document.querySelector('.video-wrapper');
     let player = document.getElementById('mainPlayer');
-    
+
     if (!player && wrapper) {
         player = document.createElement('iframe');
         player.id = 'mainPlayer';
@@ -320,13 +334,13 @@ window.playVideo = (id, title, el) => {
         player.allowFullscreen = true;
         wrapper.appendChild(player);
     }
-    
+
     player.src = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&showinfo=0&controls=0&fs=1`;
     document.getElementById('videoTitle').innerText = title;
 
     document.querySelectorAll('.lesson-item').forEach(x => x.classList.remove('active'));
     if(el) el.classList.add('active');
-    
+
     saveHistory(id, title);
 };
 
@@ -341,7 +355,7 @@ async function loadHistory(user) {
     const snap = await getDocs(query(collection(db, "users", user.uid, "watchHistory"), limit(10)));
     list.innerHTML = ""; 
     if(snap.empty) { list.innerHTML = "<p style='color:#666; font-size:0.8rem;'>No history.</p>"; return; }
-    
+
     const items = [];
     snap.forEach(d => items.push(d.data()));
     items.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));

@@ -65,19 +65,19 @@ window.closeAuthModal = () => {
 };
 
 window.switchTab = (element, pageId) => {
-    // --- NEW FIX: STOP VIDEO WHEN SWITCHING TABS ---
-    const player = document.getElementById('mainPlayer');
-    const classroom = document.getElementById('classroom');
     
-    // If we are currently in classroom and switching to another page
-    if (classroom && !classroom.classList.contains('hidden') && pageId !== 'classroom') {
+    // --- AGGRESSIVE FIX: STOP VIDEO ---
+    // If we are going to 'home' or 'courses', KILL the video player immediately.
+    if (pageId === 'home' || pageId === 'courses') {
+        const player = document.getElementById('mainPlayer');
         if(player) {
-            player.src = ""; // This stops the audio/video
+            player.src = ""; // This wipes the video source
+            player.removeAttribute('src'); // This ensures it really stops
         }
         const titleEl = document.getElementById('videoTitle');
         if(titleEl) titleEl.innerText = "Select a Class to Start";
     }
-    // ----------------------------------------------
+    // ----------------------------------
 
     if(pageId) showPage(pageId);
     const bubble = document.getElementById('navBubble');
@@ -114,9 +114,8 @@ onAuthStateChanged(auth, async (user) => {
     const loginView = document.getElementById('loginContent');
     const profileView = document.getElementById('profileContent');
 
-    // 1. UPDATE UI IMMEDIATELY (Fixes "Can't Login" visual issue)
+    // 1. UPDATE UI IMMEDIATELY
     if (user) {
-        // Logged In State
         const photoURL = user.photoURL || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
         if(navIconDiv) navIconDiv.innerHTML = `<img src="${photoURL}" class="nav-user-img" alt="User">`;
         if(label) label.innerText = "Profile";
@@ -129,11 +128,9 @@ onAuthStateChanged(auth, async (user) => {
             document.getElementById('userEmail').innerText = user.email;
         }
 
-        // Create/Check Profile in Background
         checkAndCreateProfile(user).catch(e => console.log("Profile check err", e));
 
     } else {
-        // Logged Out State
         if(navIconDiv) navIconDiv.innerHTML = `<i class="fas fa-user"></i>`;
         if(label) label.innerText = "Login";
 
@@ -141,11 +138,10 @@ onAuthStateChanged(auth, async (user) => {
         if(profileView) profileView.classList.add('hidden');
     }
 
-    // 2. RENDER COURSES (With Safety Check)
-    // This runs after UI update so the app doesn't feel "stuck"
+    // 2. RENDER COURSES
     await renderCourses(user);
 
-    // 3. LOAD HISTORY (Only if logged in)
+    // 3. LOAD HISTORY
     if (user) {
         try {
             await loadHistory(user);
@@ -189,7 +185,7 @@ async function checkSubscription(userId) {
         }
     } catch (e) {
         console.error("Subscription check failed", e);
-        return { hasAccess: false }; // Default to locked if error
+        return { hasAccess: false }; 
     }
     return { hasAccess: false };
 }
@@ -200,7 +196,6 @@ async function renderCourses(user) {
 
     let hasAccess = false;
 
-    // Safety: If checking fails, code continues instead of freezing
     if (user) {
         courseList.innerHTML = '<p style="color:#aaa; text-align:center; padding:20px;">Checking subscription...</p>';
         try {

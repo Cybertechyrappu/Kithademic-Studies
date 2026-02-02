@@ -48,58 +48,32 @@ const courseContent = {
 };
 
 // ==========================================
-// 3. UI NAVIGATION
+// 3. UI NAVIGATION & VIDEO CONTROL
 // ==========================================
 
-// --- 1. ROBUST BACK BUTTON FUNCTION ---
-window.goBackToCourses = () => {
-    // A. Kill the video (Nuclear Option)
+// Helper: Kill Video (Stops Audio)
+const killVideo = () => {
     const wrapper = document.querySelector('.video-wrapper');
-    if (wrapper) wrapper.innerHTML = "";
+    if (wrapper) wrapper.innerHTML = ""; // This is the only way to 100% stop audio
     const titleEl = document.getElementById('videoTitle');
     if (titleEl) titleEl.innerText = "Select a Class to Start";
-
-    // B. Manually switch views (More reliable than switchTab)
-    document.getElementById('classroom').classList.add('hidden');
-    document.getElementById('courses').classList.remove('hidden');
-    document.getElementById('home').classList.add('hidden');
-
-    // C. Update Navigation Bar
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    
-    // Select the "Courses" button (It is the 2nd one, index 1)
-    const coursesBtn = document.querySelectorAll('.nav-item')[1]; 
-    if(coursesBtn) {
-        coursesBtn.classList.add('active');
-        const bubble = document.getElementById('navBubble');
-        if(bubble) {
-             bubble.style.width = `${coursesBtn.offsetWidth}px`;
-             bubble.style.transform = `translateX(${coursesBtn.offsetLeft}px)`;
-        }
-    }
 };
 
-window.showPage = (pageId) => {
+// Global Switch Function
+window.switchTab = (element, pageId) => {
+    // If leaving classroom, destroy video
+    if (pageId !== 'classroom') {
+        killVideo();
+    }
+
+    // Hide all pages
     document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
+    
+    // Show target page
     const target = document.getElementById(pageId);
     if(target) target.classList.remove('hidden');
-};
-
-window.openAuthModal = () => document.getElementById('authModal').classList.remove('hidden');
-
-window.closeAuthModal = () => {
-    document.getElementById('authModal').classList.add('hidden');
-};
-
-window.switchTab = (element, pageId) => {
-    // Stop video if leaving classroom via bottom nav
-    if (pageId !== 'classroom') {
-        const wrapper = document.querySelector('.video-wrapper');
-        if (wrapper) wrapper.innerHTML = "";
-    }
-
-    if(pageId) showPage(pageId);
     
+    // Animate Bubble
     if (element) {
         const bubble = document.getElementById('navBubble');
         if(bubble) {
@@ -112,14 +86,32 @@ window.switchTab = (element, pageId) => {
     }
 };
 
+window.openAuthModal = () => document.getElementById('authModal').classList.remove('hidden');
+window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
+
+// Initialize App
 document.addEventListener("DOMContentLoaded", () => {
+    
+    // 1. Activate Home Tab
     const activeBtn = document.querySelector('.nav-item.active'); 
     if(activeBtn) setTimeout(() => window.switchTab(activeBtn, null), 100); 
+    
+    // 2. Attach Back Button Listener (This fixes the broken back button)
+    const backBtn = document.getElementById('backToCoursesBtn');
+    if(backBtn) {
+        backBtn.addEventListener('click', () => {
+            killVideo(); // Stop video
+            // Manually trigger Courses Tab
+            const coursesBtn = document.querySelectorAll('.nav-item')[1]; 
+            window.switchTab(coursesBtn, 'courses');
+        });
+    }
+
     renderCourses(null);
 });
 
 // ==========================================
-// 4. AUTHENTICATION & LISTENERS
+// 4. AUTH & USER LOGIC
 // ==========================================
 window.handleGoogleAuth = async () => {
     try {
@@ -149,26 +141,15 @@ onAuthStateChanged(auth, async (user) => {
             document.getElementById('userName').innerText = user.displayName || "Student";
             document.getElementById('userEmail').innerText = user.email;
         }
-
-        checkAndCreateProfile(user).catch(e => console.log("Profile check err", e));
-
+        checkAndCreateProfile(user);
     } else {
         if(navIconDiv) navIconDiv.innerHTML = `<i class="fas fa-user"></i>`;
         if(label) label.innerText = "Login";
-
         if(loginView) loginView.classList.remove('hidden');
         if(profileView) profileView.classList.add('hidden');
     }
-
     await renderCourses(user);
-
-    if (user) {
-        try {
-            await loadHistory(user);
-        } catch (e) {
-            console.error("History load failed:", e);
-        }
-    }
+    if(user) loadHistory(user);
 });
 
 window.handleSignOut = () => {
@@ -179,15 +160,12 @@ window.handleSignOut = () => {
     }).catch((error) => alert("Error: " + error.message));
 };
 
-// ==========================================
-// 5. DATABASE & LOGIC
-// ==========================================
 async function checkAndCreateProfile(user) {
     try {
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
         if (!userSnap.exists()) await setDoc(userRef, { email: user.email, uid: user.uid, expiryDate: null });
-    } catch(e) { console.error("Create profile error", e); }
+    } catch(e) { console.error(e); }
 }
 
 async function checkSubscription(userId) {
@@ -201,54 +179,31 @@ async function checkSubscription(userId) {
             const expiry = new Date(data.expiryDate);
             return (expiry - today) > 0 ? { hasAccess: true } : { hasAccess: false };
         }
-    } catch (e) {
-        console.error("Subscription check failed", e);
-        return { hasAccess: false }; 
-    }
+    } catch (e) { return { hasAccess: false }; }
     return { hasAccess: false };
 }
 
 async function renderCourses(user) {
     const courseList = document.getElementById('courseList');
     if(!courseList) return;
-
     let hasAccess = false;
-
     if (user) {
-        courseList.innerHTML = '<p style="color:#aaa; text-align:center; padding:20px;">Checking subscription...</p>';
-        try {
-            const sub = await checkSubscription(user.uid);
-            hasAccess = sub.hasAccess;
-        } catch(e) {
-            console.error("Render course error", e);
-            hasAccess = false;
-        }
+        courseList.innerHTML = '<p style="color:#aaa; text-align:center;">Checking subscription...</p>';
+        try { const sub = await checkSubscription(user.uid); hasAccess = sub.hasAccess; } catch(e){}
     }
-
     courseList.innerHTML = ""; 
-
     courses.forEach(c => {
         const div = document.createElement('div');
         div.className = 'course-card';
         const featuresHtml = c.features.map(f => `<li><i class="fas fa-check-circle"></i> ${f}</li>`).join('');
-
-        let actionButton = "";
-
-        if (c.price === 0) {
-            actionButton = `<button class="btn-gold" style="font-size:0.8rem;" onclick="openCourse('${c.id}')"><i class="fas fa-play"></i> Open</button>`;
-        } else if (hasAccess) {
-            actionButton = `<button class="btn-gold" style="font-size:0.8rem;" onclick="openCourse('${c.id}')"><i class="fas fa-play"></i> Open</button>`;
-        } else {
-            actionButton = `<button class="btn-buy" onclick="buyCourse('${c.id}')">Buy</button>`;
-        }
+        let actionButton = (c.price === 0 || hasAccess) 
+            ? `<button class="btn-gold" style="font-size:0.8rem;" onclick="openCourse('${c.id}')"><i class="fas fa-play"></i> Open</button>`
+            : `<button class="btn-buy" onclick="buyCourse('${c.id}')">Buy</button>`;
 
         div.innerHTML = `
             <div class="card-header"><h3>${c.title}</h3><span class="badge">${c.price === 0 ? "FREE" : "3-Month Plan"}</span></div>
             <p class="desc">${c.desc}</p><ul class="features">${featuresHtml}</ul>
-            <div class="card-footer"><b class="price">₹${c.price}</b>
-            <div style="display:flex; gap:10px;">
-                ${actionButton}
-            </div></div>`;
+            <div class="card-footer"><b class="price">₹${c.price}</b><div style="display:flex; gap:10px;">${actionButton}</div></div>`;
         courseList.appendChild(div);
     });
 }
@@ -257,29 +212,22 @@ window.buyCourse = (courseId) => {
     const user = auth.currentUser;
     if (!user) { alert("Please Sign In."); openAuthModal(); return; }
     const course = courses.find(c => c.id === courseId);
-    const msg = `Salam Kithademic!%0aI want to buy: *${course.title}*.%0aPrice: ₹${course.price}.%0aMy Email: ${user.email}%0aMy UID: ${user.uid}%0a%0aPlease send UPI details.`;
-    window.open(`https://wa.me/${adminPhone}?text=${msg}`, '_blank');
+    window.open(`https://wa.me/${adminPhone}?text=I want to buy: ${course.title}`, '_blank');
 };
 
-// ==========================================
-// 6. CLASSROOM & HISTORY
-// ==========================================
 window.openCourse = async (courseId) => {
     if (!auth.currentUser) { alert("Login first."); openAuthModal(); return; }
-
     const course = courses.find(c => c.id === courseId);
     if (course.price > 0) {
         const sub = await checkSubscription(auth.currentUser.uid);
-        if (!sub.hasAccess) {
-            if(confirm("Plan Expired. Renew?")) buyCourse(courseId);
-            return;
-        }
+        if (!sub.hasAccess) { if(confirm("Renew?")) buyCourse(courseId); return; }
     }
-
+    
+    // Switch to Classroom
+    document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
+    document.getElementById('classroom').classList.remove('hidden');
+    
     const lessons = courseContent[courseId];
-    if (!lessons) return alert("Coming Soon.");
-
-    showPage('classroom');
     const pl = document.getElementById('playlistItems');
     pl.innerHTML = "";
     lessons.forEach((l, i) => {
@@ -289,143 +237,65 @@ window.openCourse = async (courseId) => {
         d.onclick = () => window.playVideo(l.videoId, l.title, d);
         pl.appendChild(d);
     });
-
     if(lessons.length) window.playVideo(lessons[0].videoId, lessons[0].title, pl.firstChild);
 };
 
-// --- VIDEO PLAYER LOGIC (FIXED BLACK SCREEN) ---
 window.playVideo = (id, title, el) => {
     const wrapper = document.querySelector('.video-wrapper');
-    
-    // 1. RE-CREATE IFRAME if deleted
     let player = document.getElementById('mainPlayer');
+    
     if (!player && wrapper) {
         player = document.createElement('iframe');
         player.id = 'mainPlayer';
         player.width = "100%";
         player.height = "100%";
         player.frameBorder = "0";
-        // ALLOWING AUTOPLAY
         player.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
         player.allowFullscreen = true;
         wrapper.appendChild(player);
     }
-
-    // 2. Play Video WITH CONTROLS enabled (controls=1)
-    // This fixes the black screen issue. Minimal branding is still applied.
-    const embedUrl = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&showinfo=0&controls=1&iv_load_policy=3&fs=1`;
     
-    if(player) player.src = embedUrl;
-    
+    // CONTROLS MUST BE 1 to avoid black screen on mobile
+    player.src = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&showinfo=0&controls=1&fs=1`;
     document.getElementById('videoTitle').innerText = title;
 
     document.querySelectorAll('.lesson-item').forEach(x => x.classList.remove('active'));
     if(el) el.classList.add('active');
-
+    
     saveHistory(id, title);
 };
 
+// ... History & PWA code remains same ...
 async function saveHistory(videoId, title) {
     const user = auth.currentUser;
     if(!user) return;
-
-    const historyRef = doc(db, "users", user.uid, "watchHistory", videoId);
-    try {
-        await setDoc(historyRef, {
-            videoId: videoId,
-            title: title,
-            timestamp: serverTimestamp()
-        });
-        loadHistory(user);
-    } catch(e) { console.log("History save error", e); }
+    try { await setDoc(doc(db, "users", user.uid, "watchHistory", videoId), { videoId, title, timestamp: serverTimestamp() }); } catch(e){}
 }
-
 async function loadHistory(user) {
     const list = document.getElementById('historyList');
     if(!list) return;
-
-    const q = query(
-        collection(db, "users", user.uid, "watchHistory"), 
-        limit(10) 
-    );
-
-    const snapshot = await getDocs(q);
+    const snap = await getDocs(query(collection(db, "users", user.uid, "watchHistory"), limit(10)));
     list.innerHTML = ""; 
+    if(snap.empty) { list.innerHTML = "<p style='color:#666; font-size:0.8rem;'>No history.</p>"; return; }
+    
+    const items = [];
+    snap.forEach(d => items.push(d.data()));
+    items.sort((a,b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
 
-    if(snapshot.empty) {
-        list.innerHTML = "<p style='color:#666; font-size:0.8rem; font-style:italic; padding:10px;'>No classes watched yet.</p>";
-        return;
-    }
-
-    const historyItems = [];
-    snapshot.forEach(doc => {
-        historyItems.push(doc.data());
-    });
-
-    historyItems.sort((a, b) => {
-        const timeA = a.timestamp ? a.timestamp.seconds : Date.now()/1000;
-        const timeB = b.timestamp ? b.timestamp.seconds : Date.now()/1000;
-        return timeB - timeA;
-    });
-
-    historyItems.forEach(data => {
+    items.forEach(d => {
         const div = document.createElement('div');
         div.className = 'history-card';
-        const thumbUrl = `https://img.youtube.com/vi/${data.videoId}/mqdefault.jpg`;
-
-        div.innerHTML = `
-            <div style="position:relative;">
-                <img src="${thumbUrl}" class="history-thumb" alt="thumb">
-                <i class="fas fa-play play-overlay"></i>
-            </div>
-            <div class="history-info">
-                <div class="history-title">${data.title}</div>
-                <div class="history-meta">
-                    <i class="fas fa-check-circle" style="color:var(--accent-gold)"></i> Watched
-                </div>
-            </div>
-        `;
-        div.onclick = () => {
-            closeAuthModal();
-            findAndPlayVideo(data.videoId);
-        };
+        div.innerHTML = `<img src="https://img.youtube.com/vi/${d.videoId}/mqdefault.jpg" class="history-thumb"><div class="history-info"><div class="history-title">${d.title}</div></div>`;
+        div.onclick = () => { closeAuthModal(); findAndPlayVideo(d.videoId); };
         list.appendChild(div);
     });
 }
-
 function findAndPlayVideo(videoId) {
-    for (const [courseId, lessons] of Object.entries(courseContent)) {
-        const lesson = lessons.find(l => l.videoId === videoId);
-        if (lesson) {
-            openCourse(courseId).then(() => {
-                setTimeout(() => playVideo(videoId, lesson.title, null), 500);
-            });
-            return;
-        }
+    for (const [cid, ls] of Object.entries(courseContent)) {
+        if (ls.find(l => l.videoId === videoId)) { window.openCourse(cid).then(() => window.playVideo(videoId, "", null)); return; }
     }
 }
-
-// --- PWA INSTALL ---
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    const installBtn = document.getElementById('installBtn');
-    if(installBtn) installBtn.style.display = 'block';
-});
-
-window.installApp = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log(`User response: ${outcome}`);
-    deferredPrompt = null;
-};
-
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('SW Registered'))
-            .catch(err => console.log('SW Failed', err));
-    });
-}
+// PWA
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); document.getElementById('installBtn').style.display='block'; window.deferredPrompt = e; });
+window.installApp = async () => { if(window.deferredPrompt){ window.deferredPrompt.prompt(); window.deferredPrompt = null; } };
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');

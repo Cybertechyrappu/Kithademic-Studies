@@ -67,12 +67,12 @@ window.closeAuthModal = () => {
 window.switchTab = (element, pageId) => {
     
     // --- AGGRESSIVE FIX: STOP VIDEO ---
-    // If we are going to 'home' or 'courses', KILL the video player immediately.
+    // Stops audio/video immediately when leaving classroom
     if (pageId === 'home' || pageId === 'courses') {
         const player = document.getElementById('mainPlayer');
         if(player) {
-            player.src = ""; // This wipes the video source
-            player.removeAttribute('src'); // This ensures it really stops
+            player.src = ""; // Wipes source
+            player.removeAttribute('src'); // Fully unloads
         }
         const titleEl = document.getElementById('videoTitle');
         if(titleEl) titleEl.innerText = "Select a Class to Start";
@@ -91,7 +91,6 @@ window.switchTab = (element, pageId) => {
 document.addEventListener("DOMContentLoaded", () => {
     const activeBtn = document.querySelector('.nav-item.active'); 
     if(activeBtn) setTimeout(() => window.switchTab(activeBtn, null), 100); 
-    // Render initially for guests
     renderCourses(null);
 });
 
@@ -275,8 +274,15 @@ window.openCourse = async (courseId) => {
     if(lessons.length) window.playVideo(lessons[0].videoId, lessons[0].title, pl.firstChild);
 };
 
+// --- UI FIX: PROFESSIONAL PLAYER ---
 window.playVideo = (id, title, el) => {
-    document.getElementById('mainPlayer').src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`;
+    // 1. modestbranding=1 -> Hides logo
+    // 2. rel=0 -> No random recommended videos
+    // 3. iv_load_policy=3 -> Hides annotations
+    // 4. fs=1 -> Allows fullscreen
+    const embedUrl = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&showinfo=0&controls=1&iv_load_policy=3&fs=1`;
+    
+    document.getElementById('mainPlayer').src = embedUrl;
     document.getElementById('videoTitle').innerText = title;
 
     document.querySelectorAll('.lesson-item').forEach(x => x.classList.remove('active'));
@@ -305,7 +311,6 @@ async function loadHistory(user) {
     const list = document.getElementById('historyList');
     if(!list) return;
 
-    // Simplified query to avoid index errors
     const q = query(
         collection(db, "users", user.uid, "watchHistory"), 
         limit(10) 
@@ -324,7 +329,6 @@ async function loadHistory(user) {
         historyItems.push(doc.data());
     });
 
-    // Sort manually in JS
     historyItems.sort((a, b) => {
         const timeA = a.timestamp ? a.timestamp.seconds : Date.now()/1000;
         const timeB = b.timestamp ? b.timestamp.seconds : Date.now()/1000;

@@ -41,7 +41,7 @@ const courses = [
 
 const courseContent = {
     "c_01": [
-        { title: "Introduction to Course", videoId: "dQw4w9WgXcQ" }, 
+        { title: "Introduction to Course", videoId: "pWBPJlPFqRY" }, 
         { title: "Chapter 1: Basics", videoId: "KMT1J3Lg6h0" },
         { title: "Chapter 2: Advanced", videoId: "8jP8CC23ibY" }
     ],

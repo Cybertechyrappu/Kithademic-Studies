@@ -48,32 +48,50 @@ const courseContent = {
 };
 
 // ==========================================
-// 3. UI NAVIGATION & VIDEO CONTROL
+// 3. UI NAVIGATION & LOGIC
 // ==========================================
 
 // Helper: Kill Video (Stops Audio)
 const killVideo = () => {
     const wrapper = document.querySelector('.video-wrapper');
-    if (wrapper) wrapper.innerHTML = ""; // This is the only way to 100% stop audio
+    if (wrapper) wrapper.innerHTML = ""; 
     const titleEl = document.getElementById('videoTitle');
     if (titleEl) titleEl.innerText = "Select a Class to Start";
 };
 
-// Global Switch Function
+window.showPage = (pageId) => {
+    document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
+    const target = document.getElementById(pageId);
+    if(target) target.classList.remove('hidden');
+};
+
+window.openAuthModal = () => document.getElementById('authModal').classList.remove('hidden');
+
+// --- FIX: GO HOME ON CLOSE ---
+window.closeAuthModal = () => {
+    document.getElementById('authModal').classList.add('hidden');
+    
+    // Find the Home Button (Index 0) and click it virtually
+    const homeBtn = document.querySelectorAll('.nav-item')[0];
+    if (homeBtn) {
+        window.switchTab(homeBtn, 'home');
+    }
+};
+
+window.goBackToCourses = () => {
+    killVideo();
+    const coursesBtn = document.querySelectorAll('.nav-item')[1]; 
+    window.switchTab(coursesBtn, 'courses');
+};
+
 window.switchTab = (element, pageId) => {
     // If leaving classroom, destroy video
     if (pageId !== 'classroom') {
         killVideo();
     }
 
-    // Hide all pages
-    document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
+    if(pageId) showPage(pageId);
     
-    // Show target page
-    const target = document.getElementById(pageId);
-    if(target) target.classList.remove('hidden');
-    
-    // Animate Bubble
     if (element) {
         const bubble = document.getElementById('navBubble');
         if(bubble) {
@@ -86,22 +104,15 @@ window.switchTab = (element, pageId) => {
     }
 };
 
-window.openAuthModal = () => document.getElementById('authModal').classList.remove('hidden');
-window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
-
-// Initialize App
 document.addEventListener("DOMContentLoaded", () => {
-    
-    // 1. Activate Home Tab
     const activeBtn = document.querySelector('.nav-item.active'); 
     if(activeBtn) setTimeout(() => window.switchTab(activeBtn, null), 100); 
     
-    // 2. Attach Back Button Listener (This fixes the broken back button)
+    // Back Button Logic
     const backBtn = document.getElementById('backToCoursesBtn');
     if(backBtn) {
         backBtn.addEventListener('click', () => {
-            killVideo(); // Stop video
-            // Manually trigger Courses Tab
+            killVideo(); 
             const coursesBtn = document.querySelectorAll('.nav-item')[1]; 
             window.switchTab(coursesBtn, 'courses');
         });
@@ -116,7 +127,7 @@ document.addEventListener("DOMContentLoaded", () => {
 window.handleGoogleAuth = async () => {
     try {
         await signInWithPopup(auth, googleProvider);
-        closeAuthModal();
+        closeAuthModal(); // This will now auto-redirect to Home
     } catch (error) {
         console.error(error);
         alert("Login Error: " + error.message);
@@ -154,12 +165,15 @@ onAuthStateChanged(auth, async (user) => {
 
 window.handleSignOut = () => {
     signOut(auth).then(() => {
-        closeAuthModal();
+        closeAuthModal(); // Will go to Home
         alert("Logged Out Successfully");
         window.location.reload();
     }).catch((error) => alert("Error: " + error.message));
 };
 
+// ==========================================
+// 5. DATABASE & LOGIC
+// ==========================================
 async function checkAndCreateProfile(user) {
     try {
         const userRef = doc(db, "users", user.uid);
@@ -255,7 +269,6 @@ window.playVideo = (id, title, el) => {
         wrapper.appendChild(player);
     }
     
-    // CONTROLS MUST BE 1 to avoid black screen on mobile
     player.src = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&showinfo=0&controls=1&fs=1`;
     document.getElementById('videoTitle').innerText = title;
 
@@ -265,7 +278,6 @@ window.playVideo = (id, title, el) => {
     saveHistory(id, title);
 };
 
-// ... History & PWA code remains same ...
 async function saveHistory(videoId, title) {
     const user = auth.currentUser;
     if(!user) return;

@@ -95,9 +95,6 @@
         <div class="logo">
             <i class="fas fa-book-quran"></i> 
         </div>
-        <button class="admin-btn-top" onclick="openAdminCheck()">
-            <i class="fas fa-user-shield"></i>
-        </button>
     </div>
 
     <div class="parallax-bg"></div>
@@ -110,6 +107,14 @@
                 <h2>Welcome to <span class="gold-text">Kithademic Studies</span></h2>
                 <p>Knowledge is the light of the heart.<br>Excellence in Islamic & Academic Education.</p>
                 <button class="btn-primary" onclick="switchTab(document.querySelectorAll('.nav-item')[1], 'courses')">Start Learning</button>
+            </div>
+
+            <div id="myCoursesSection" class="hidden" style="width: 90%; max-width: 1200px; margin: 40px auto; padding-bottom: 40px;">
+                <h2 style="font-size: 1.8rem; margin-bottom: 20px; text-align: left; border-bottom: 1px solid rgba(238, 187, 93, 0.3); padding-bottom: 10px;">
+                    <i class="fas fa-graduation-cap" style="color:var(--accent-gold);"></i> <span class="gold-text">My Learning</span>
+                </h2>
+                <div id="myCoursesList" class="course-grid" style="margin-top: 0;">
+                    </div>
             </div>
         </section>
 
@@ -138,14 +143,6 @@
             <button class="btn-primary" onclick="switchTab(document.querySelectorAll('.nav-item')[1], 'courses')">Back to Courses</button>
         </section>
 
-        <section id="adminPanel" class="page hidden">
-            <h2>Admin Dashboard</h2>
-            <div class="modal-content">
-                <input type="text" id="studentId" placeholder="Paste User UID here">
-                <button class="btn-primary" onclick="addMonth()">Add 90 Days Access</button>
-                <p id="adminStatus" style="margin-top:10px; color:var(--accent-gold);"></p>
-            </div>
-        </section>
 
     </main>
 

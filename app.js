@@ -24,7 +24,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
-const adminPhone = "919526755210"; 
+const adminPhone = "919544268849"; 
 
 // ==========================================
 // 2. DATA

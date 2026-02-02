@@ -66,22 +66,20 @@ window.closeAuthModal = () => {
 
 window.switchTab = (element, pageId) => {
     
-    // --- FORCE STOP VIDEO FIX ---
-    // Whenever we go to a page that IS NOT 'classroom', we kill the video.
+    // --- NUCLEAR FIX: DESTROY VIDEO PLAYER ---
+    // Whenever we leave the classroom, we completely DELETE the iframe.
     if (pageId !== 'classroom') {
-        const player = document.getElementById('mainPlayer');
-        if(player) {
-            // "about:blank" forces the iframe to unload the YouTube player completely
-            player.src = "about:blank"; 
+        const wrapper = document.querySelector('.video-wrapper');
+        if (wrapper) {
+            wrapper.innerHTML = ''; // This forces audio to stop 100%
         }
         const titleEl = document.getElementById('videoTitle');
         if(titleEl) titleEl.innerText = "Select a Class to Start";
     }
-    // ----------------------------
+    // -----------------------------------------
 
     if(pageId) showPage(pageId);
     
-    // Safety check for element (prevents crash if element is missing)
     if (element) {
         const bubble = document.getElementById('navBubble');
         if(bubble) {
@@ -97,7 +95,6 @@ window.switchTab = (element, pageId) => {
 document.addEventListener("DOMContentLoaded", () => {
     const activeBtn = document.querySelector('.nav-item.active'); 
     if(activeBtn) setTimeout(() => window.switchTab(activeBtn, null), 100); 
-    // Render initially for guests
     renderCourses(null);
 });
 
@@ -278,12 +275,30 @@ window.openCourse = async (courseId) => {
     if(lessons.length) window.playVideo(lessons[0].videoId, lessons[0].title, pl.firstChild);
 };
 
-// --- UI FIX: PROFESSIONAL PLAYER ---
+// --- UI FIX: NO CONTROLS & FORCE REBUILD ---
 window.playVideo = (id, title, el) => {
-    // Professional parameters enabled
-    const embedUrl = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&showinfo=0&controls=1&iv_load_policy=3&fs=1`;
+    const wrapper = document.querySelector('.video-wrapper');
     
-    document.getElementById('mainPlayer').src = embedUrl;
+    // 1. RE-CREATE IFRAME (Nuclear Fix)
+    let player = document.getElementById('mainPlayer');
+    if (!player && wrapper) {
+        player = document.createElement('iframe');
+        player.id = 'mainPlayer';
+        player.width = "100%";
+        player.height = "100%";
+        player.frameBorder = "0";
+        player.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+        // removed allowFullscreen to match fs=0
+        wrapper.appendChild(player);
+    }
+
+    // 2. Play Video with NO CONTROLS
+    // controls=0 -> Hides bottom bar
+    // fs=0 -> Hides fullscreen button (since bar is hidden)
+    const embedUrl = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&showinfo=0&controls=0&iv_load_policy=3&fs=0`;
+    
+    if(player) player.src = embedUrl;
+    
     document.getElementById('videoTitle').innerText = title;
 
     document.querySelectorAll('.lesson-item').forEach(x => x.classList.remove('active'));

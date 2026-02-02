@@ -222,11 +222,17 @@ async function renderCourses(user) {
     });
 }
 
+// --- UPDATED WHATSAPP MESSAGE LOGIC ---
 window.buyCourse = (courseId) => {
     const user = auth.currentUser;
     if (!user) { alert("Please Sign In."); openAuthModal(); return; }
+    
     const course = courses.find(c => c.id === courseId);
-    window.open(`https://wa.me/${adminPhone}?text=I want to buy: ${course.title}`, '_blank');
+    const userName = user.displayName || "Student";
+    
+    const msg = `${userName}%0aI want to buy: *${course.title}*.%0aPrice: ₹${course.price}.%0aMy Email: ${user.email}%0aMy UID: ${user.uid}%0a%0aPlease send UPI details.`;
+    
+    window.open(`https://wa.me/${adminPhone}?text=${msg}`, '_blank');
 };
 
 window.openCourse = async (courseId) => {

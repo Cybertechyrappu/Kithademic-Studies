@@ -87,6 +87,11 @@
             text-shadow: 0 2px 5px rgba(0,0,0,0.8);
         }
         .history-card:hover .play-overlay { opacity: 1; }
+        
+        /* Back Button Hover */
+        button[onclick*="switchTab"]:hover {
+            background: rgba(238, 187, 93, 0.1) !important;
+        }
     </style>
 </head>
 <body>
@@ -100,7 +105,7 @@
     <div class="parallax-bg"></div>
 
     <main id="app">
-        
+
         <section id="home" class="page active">
             <div class="hero-content">
                 <h1 class="arabic-font">بِسْمِ ٱللَّٰهِ</h1>
@@ -116,6 +121,13 @@
         </section>
 
         <section id="classroom" class="page hidden">
+            <div style="width: 95%; max-width: 1300px; margin: 0 auto 15px auto; text-align: left;">
+                <button onclick="switchTab(document.querySelectorAll('.nav-item')[1], 'courses')" 
+                        style="background: transparent; border: 1px solid var(--accent-gold); color: var(--accent-gold); padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-arrow-left"></i> Back to Courses
+                </button>
+            </div>
+
             <div class="classroom-container">
                 <div class="video-area">
                     <div class="video-wrapper">
@@ -132,6 +144,7 @@
                     <div id="playlistItems" class="playlist-items"></div>
                 </div>
             </div>
+            
             <button class="btn-primary" onclick="switchTab(document.querySelectorAll('.nav-item')[1], 'courses')">Back to Courses</button>
         </section>
 
@@ -155,7 +168,7 @@
     <div id="authModal" class="modal hidden">
         <div class="modal-content">
             <span class="close" onclick="closeAuthModal()" style="float:right; cursor:pointer; font-size:1.5rem;">&times;</span>
-            
+
             <div id="loginContent" style="text-align: center; padding-bottom: 10px;">
                 <h2 id="modalTitle" style="margin-bottom: 30px;">Get Access</h2>
                 <p style="color:#aaa; margin-bottom: 20px; font-size: 0.9rem;">Access your courses and track your progress.</p>

@@ -65,6 +65,20 @@ window.closeAuthModal = () => {
 };
 
 window.switchTab = (element, pageId) => {
+    // --- NEW FIX: STOP VIDEO WHEN SWITCHING TABS ---
+    const player = document.getElementById('mainPlayer');
+    const classroom = document.getElementById('classroom');
+    
+    // If we are currently in classroom and switching to another page
+    if (classroom && !classroom.classList.contains('hidden') && pageId !== 'classroom') {
+        if(player) {
+            player.src = ""; // This stops the audio/video
+        }
+        const titleEl = document.getElementById('videoTitle');
+        if(titleEl) titleEl.innerText = "Select a Class to Start";
+    }
+    // ----------------------------------------------
+
     if(pageId) showPage(pageId);
     const bubble = document.getElementById('navBubble');
     bubble.style.width = `${element.offsetWidth}px`;
@@ -106,7 +120,7 @@ onAuthStateChanged(auth, async (user) => {
         const photoURL = user.photoURL || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
         if(navIconDiv) navIconDiv.innerHTML = `<img src="${photoURL}" class="nav-user-img" alt="User">`;
         if(label) label.innerText = "Profile";
-        
+
         if(loginView) loginView.classList.add('hidden');
         if(profileView) {
             profileView.classList.remove('hidden');
@@ -114,7 +128,7 @@ onAuthStateChanged(auth, async (user) => {
             document.getElementById('userName').innerText = user.displayName || "Student";
             document.getElementById('userEmail').innerText = user.email;
         }
-        
+
         // Create/Check Profile in Background
         checkAndCreateProfile(user).catch(e => console.log("Profile check err", e));
 
@@ -122,7 +136,7 @@ onAuthStateChanged(auth, async (user) => {
         // Logged Out State
         if(navIconDiv) navIconDiv.innerHTML = `<i class="fas fa-user"></i>`;
         if(label) label.innerText = "Login";
-        
+
         if(loginView) loginView.classList.remove('hidden');
         if(profileView) profileView.classList.add('hidden');
     }
@@ -185,7 +199,7 @@ async function renderCourses(user) {
     if(!courseList) return;
 
     let hasAccess = false;
-    
+
     // Safety: If checking fails, code continues instead of freezing
     if (user) {
         courseList.innerHTML = '<p style="color:#aaa; text-align:center; padding:20px;">Checking subscription...</p>';
@@ -204,9 +218,9 @@ async function renderCourses(user) {
         const div = document.createElement('div');
         div.className = 'course-card';
         const featuresHtml = c.features.map(f => `<li><i class="fas fa-check-circle"></i> ${f}</li>`).join('');
-        
+
         let actionButton = "";
-        
+
         if (c.price === 0) {
             actionButton = `<button class="btn-gold" style="font-size:0.8rem;" onclick="openCourse('${c.id}')"><i class="fas fa-play"></i> Open</button>`;
         } else if (hasAccess) {
@@ -239,7 +253,7 @@ window.buyCourse = (courseId) => {
 // ==========================================
 window.openCourse = async (courseId) => {
     if (!auth.currentUser) { alert("Login first."); openAuthModal(); return; }
-    
+
     const course = courses.find(c => c.id === courseId);
     if (course.price > 0) {
         const sub = await checkSubscription(auth.currentUser.uid);
@@ -262,14 +276,14 @@ window.openCourse = async (courseId) => {
         d.onclick = () => window.playVideo(l.videoId, l.title, d);
         pl.appendChild(d);
     });
-    
+
     if(lessons.length) window.playVideo(lessons[0].videoId, lessons[0].title, pl.firstChild);
 };
 
 window.playVideo = (id, title, el) => {
     document.getElementById('mainPlayer').src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`;
     document.getElementById('videoTitle').innerText = title;
-    
+
     document.querySelectorAll('.lesson-item').forEach(x => x.classList.remove('active'));
     if(el) el.classList.add('active');
 
@@ -280,7 +294,7 @@ window.playVideo = (id, title, el) => {
 async function saveHistory(videoId, title) {
     const user = auth.currentUser;
     if(!user) return;
-    
+
     const historyRef = doc(db, "users", user.uid, "watchHistory", videoId);
     try {
         await setDoc(historyRef, {
@@ -301,10 +315,10 @@ async function loadHistory(user) {
         collection(db, "users", user.uid, "watchHistory"), 
         limit(10) 
     );
-    
+
     const snapshot = await getDocs(q);
     list.innerHTML = ""; 
-    
+
     if(snapshot.empty) {
         list.innerHTML = "<p style='color:#666; font-size:0.8rem; font-style:italic; padding:10px;'>No classes watched yet.</p>";
         return;
@@ -314,7 +328,7 @@ async function loadHistory(user) {
     snapshot.forEach(doc => {
         historyItems.push(doc.data());
     });
-    
+
     // Sort manually in JS
     historyItems.sort((a, b) => {
         const timeA = a.timestamp ? a.timestamp.seconds : Date.now()/1000;
@@ -326,7 +340,7 @@ async function loadHistory(user) {
         const div = document.createElement('div');
         div.className = 'history-card';
         const thumbUrl = `https://img.youtube.com/vi/${data.videoId}/mqdefault.jpg`;
-        
+
         div.innerHTML = `
             <div style="position:relative;">
                 <img src="${thumbUrl}" class="history-thumb" alt="thumb">

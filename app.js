@@ -77,6 +77,7 @@ window.switchTab = (element, pageId) => {
 document.addEventListener("DOMContentLoaded", () => {
     const activeBtn = document.querySelector('.nav-item.active'); 
     if(activeBtn) setTimeout(() => window.switchTab(activeBtn, null), 100); 
+    // Render initially for guests
     renderCourses(null);
 });
 
@@ -99,10 +100,9 @@ onAuthStateChanged(auth, async (user) => {
     const loginView = document.getElementById('loginContent');
     const profileView = document.getElementById('profileContent');
 
-    await renderCourses(user);
-
+    // 1. UPDATE UI IMMEDIATELY (Fixes "Can't Login" visual issue)
     if (user) {
-        // Logged In
+        // Logged In State
         const photoURL = user.photoURL || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
         if(navIconDiv) navIconDiv.innerHTML = `<img src="${photoURL}" class="nav-user-img" alt="User">`;
         if(label) label.innerText = "Profile";
@@ -114,23 +114,32 @@ onAuthStateChanged(auth, async (user) => {
             document.getElementById('userName').innerText = user.displayName || "Student";
             document.getElementById('userEmail').innerText = user.email;
         }
+        
+        // Create/Check Profile in Background
+        checkAndCreateProfile(user).catch(e => console.log("Profile check err", e));
 
-        // Load History
-        try {
-            await loadHistory(user);
-        } catch (e) {
-            console.error("History load failed:", e);
-        }
-
-        await checkAndCreateProfile(user);
     } else {
-        // Logged Out
+        // Logged Out State
         if(navIconDiv) navIconDiv.innerHTML = `<i class="fas fa-user"></i>`;
         if(label) label.innerText = "Login";
         
         if(loginView) loginView.classList.remove('hidden');
         if(profileView) profileView.classList.add('hidden');
-        showPage('home'); 
+    }
+
+    // 2. RENDER COURSES (With Safety Check)
+    // This runs after UI update so the app doesn't feel "stuck"
+    await renderCourses(user);
+
+    // 3. LOAD HISTORY (Only if logged in)
+    if (user) {
+        try {
+            await loadHistory(user);
+        } catch (e) {
+            console.error("History load failed:", e);
+            const historyList = document.getElementById('historyList');
+            if(historyList) historyList.innerHTML = "<p style='color:#aaa; font-size:0.8rem;'>No history available.</p>";
+        }
     }
 });
 
@@ -146,20 +155,27 @@ window.handleSignOut = () => {
 // 5. DATABASE & LOGIC
 // ==========================================
 async function checkAndCreateProfile(user) {
-    const userRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userRef);
-    if (!userSnap.exists()) await setDoc(userRef, { email: user.email, uid: user.uid, expiryDate: null });
+    try {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) await setDoc(userRef, { email: user.email, uid: user.uid, expiryDate: null });
+    } catch(e) { console.error("Create profile error", e); }
 }
 
 async function checkSubscription(userId) {
-    const userRef = doc(db, "users", userId);
-    const userSnap = await getDoc(userRef);
-    if (userSnap.exists()) {
-        const data = userSnap.data();
-        if (!data.expiryDate) return { hasAccess: false };
-        const today = new Date();
-        const expiry = new Date(data.expiryDate);
-        return (expiry - today) > 0 ? { hasAccess: true } : { hasAccess: false };
+    try {
+        const userRef = doc(db, "users", userId);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+            const data = userSnap.data();
+            if (!data.expiryDate) return { hasAccess: false };
+            const today = new Date();
+            const expiry = new Date(data.expiryDate);
+            return (expiry - today) > 0 ? { hasAccess: true } : { hasAccess: false };
+        }
+    } catch (e) {
+        console.error("Subscription check failed", e);
+        return { hasAccess: false }; // Default to locked if error
     }
     return { hasAccess: false };
 }
@@ -170,10 +186,16 @@ async function renderCourses(user) {
 
     let hasAccess = false;
     
+    // Safety: If checking fails, code continues instead of freezing
     if (user) {
-        courseList.innerHTML = '<p style="color:#aaa; text-align:center;">Checking subscription...</p>';
-        const sub = await checkSubscription(user.uid);
-        hasAccess = sub.hasAccess;
+        courseList.innerHTML = '<p style="color:#aaa; text-align:center; padding:20px;">Checking subscription...</p>';
+        try {
+            const sub = await checkSubscription(user.uid);
+            hasAccess = sub.hasAccess;
+        } catch(e) {
+            console.error("Render course error", e);
+            hasAccess = false;
+        }
     }
 
     courseList.innerHTML = ""; 
@@ -274,6 +296,7 @@ async function loadHistory(user) {
     const list = document.getElementById('historyList');
     if(!list) return;
 
+    // Simplified query to avoid index errors
     const q = query(
         collection(db, "users", user.uid, "watchHistory"), 
         limit(10) 
@@ -292,6 +315,7 @@ async function loadHistory(user) {
         historyItems.push(doc.data());
     });
     
+    // Sort manually in JS
     historyItems.sort((a, b) => {
         const timeA = a.timestamp ? a.timestamp.seconds : Date.now()/1000;
         const timeB = b.timestamp ? b.timestamp.seconds : Date.now()/1000;

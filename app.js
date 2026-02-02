@@ -48,15 +48,35 @@ const courseContent = {
 };
 
 // ==========================================
-// 3. UI NAVIGATION & LOGIC FIXES
+// 3. UI NAVIGATION
 // ==========================================
 
-// Helper to kill video
-const killVideo = () => {
+// --- 1. ROBUST BACK BUTTON FUNCTION ---
+window.goBackToCourses = () => {
+    // A. Kill the video (Nuclear Option)
     const wrapper = document.querySelector('.video-wrapper');
-    if (wrapper) wrapper.innerHTML = ""; // Destroys iframe
+    if (wrapper) wrapper.innerHTML = "";
     const titleEl = document.getElementById('videoTitle');
     if (titleEl) titleEl.innerText = "Select a Class to Start";
+
+    // B. Manually switch views (More reliable than switchTab)
+    document.getElementById('classroom').classList.add('hidden');
+    document.getElementById('courses').classList.remove('hidden');
+    document.getElementById('home').classList.add('hidden');
+
+    // C. Update Navigation Bar
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    
+    // Select the "Courses" button (It is the 2nd one, index 1)
+    const coursesBtn = document.querySelectorAll('.nav-item')[1]; 
+    if(coursesBtn) {
+        coursesBtn.classList.add('active');
+        const bubble = document.getElementById('navBubble');
+        if(bubble) {
+             bubble.style.width = `${coursesBtn.offsetWidth}px`;
+             bubble.style.transform = `translateX(${coursesBtn.offsetLeft}px)`;
+        }
+    }
 };
 
 window.showPage = (pageId) => {
@@ -69,28 +89,14 @@ window.openAuthModal = () => document.getElementById('authModal').classList.remo
 
 window.closeAuthModal = () => {
     document.getElementById('authModal').classList.add('hidden');
-    // If closing auth modal on mobile, ensure we go to home if not in courses
-    const homeBtn = document.querySelector('.nav-item'); 
-    // window.switchTab(homeBtn, null); // Removed to prevent accidental nav
-};
-
-// --- NEW FUNCTION: SPECIFIC BACK BUTTON HANDLER ---
-window.goBackToCourses = () => {
-    // 1. Kill Video First
-    killVideo();
-    
-    // 2. Switch Tab Manually
-    const coursesBtn = document.querySelectorAll('.nav-item')[1]; // Index 1 = Courses
-    window.switchTab(coursesBtn, 'courses');
 };
 
 window.switchTab = (element, pageId) => {
-    
-    // --- NAV BAR HANDLER: KILL VIDEO IF LEAVING CLASSROOM ---
+    // Stop video if leaving classroom via bottom nav
     if (pageId !== 'classroom') {
-        killVideo();
+        const wrapper = document.querySelector('.video-wrapper');
+        if (wrapper) wrapper.innerHTML = "";
     }
-    // -------------------------------------------------------
 
     if(pageId) showPage(pageId);
     
@@ -287,7 +293,7 @@ window.openCourse = async (courseId) => {
     if(lessons.length) window.playVideo(lessons[0].videoId, lessons[0].title, pl.firstChild);
 };
 
-// --- REBUILD PLAYER & NO CONTROLS ---
+// --- VIDEO PLAYER LOGIC (FIXED BLACK SCREEN) ---
 window.playVideo = (id, title, el) => {
     const wrapper = document.querySelector('.video-wrapper');
     
@@ -299,12 +305,15 @@ window.playVideo = (id, title, el) => {
         player.width = "100%";
         player.height = "100%";
         player.frameBorder = "0";
+        // ALLOWING AUTOPLAY
         player.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+        player.allowFullscreen = true;
         wrapper.appendChild(player);
     }
 
-    // 2. Load Video with controls=0 (Hides Controls)
-    const embedUrl = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&showinfo=0&controls=0&iv_load_policy=3&fs=0`;
+    // 2. Play Video WITH CONTROLS enabled (controls=1)
+    // This fixes the black screen issue. Minimal branding is still applied.
+    const embedUrl = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&showinfo=0&controls=1&iv_load_policy=3&fs=1`;
     
     if(player) player.src = embedUrl;
     

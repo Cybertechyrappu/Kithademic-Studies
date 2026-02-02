@@ -48,8 +48,17 @@ const courseContent = {
 };
 
 // ==========================================
-// 3. UI NAVIGATION
+// 3. UI NAVIGATION & LOGIC FIXES
 // ==========================================
+
+// Helper to kill video
+const killVideo = () => {
+    const wrapper = document.querySelector('.video-wrapper');
+    if (wrapper) wrapper.innerHTML = ""; // Destroys iframe
+    const titleEl = document.getElementById('videoTitle');
+    if (titleEl) titleEl.innerText = "Select a Class to Start";
+};
+
 window.showPage = (pageId) => {
     document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
     const target = document.getElementById(pageId);
@@ -60,23 +69,28 @@ window.openAuthModal = () => document.getElementById('authModal').classList.remo
 
 window.closeAuthModal = () => {
     document.getElementById('authModal').classList.add('hidden');
+    // If closing auth modal on mobile, ensure we go to home if not in courses
     const homeBtn = document.querySelector('.nav-item'); 
-    if(homeBtn) window.switchTab(homeBtn, null); 
+    // window.switchTab(homeBtn, null); // Removed to prevent accidental nav
+};
+
+// --- NEW FUNCTION: SPECIFIC BACK BUTTON HANDLER ---
+window.goBackToCourses = () => {
+    // 1. Kill Video First
+    killVideo();
+    
+    // 2. Switch Tab Manually
+    const coursesBtn = document.querySelectorAll('.nav-item')[1]; // Index 1 = Courses
+    window.switchTab(coursesBtn, 'courses');
 };
 
 window.switchTab = (element, pageId) => {
     
-    // --- NUCLEAR FIX: DESTROY VIDEO PLAYER ---
-    // Whenever we leave the classroom, we completely DELETE the iframe.
+    // --- NAV BAR HANDLER: KILL VIDEO IF LEAVING CLASSROOM ---
     if (pageId !== 'classroom') {
-        const wrapper = document.querySelector('.video-wrapper');
-        if (wrapper) {
-            wrapper.innerHTML = ''; // This forces audio to stop 100%
-        }
-        const titleEl = document.getElementById('videoTitle');
-        if(titleEl) titleEl.innerText = "Select a Class to Start";
+        killVideo();
     }
-    // -----------------------------------------
+    // -------------------------------------------------------
 
     if(pageId) showPage(pageId);
     
@@ -147,8 +161,6 @@ onAuthStateChanged(auth, async (user) => {
             await loadHistory(user);
         } catch (e) {
             console.error("History load failed:", e);
-            const historyList = document.getElementById('historyList');
-            if(historyList) historyList.innerHTML = "<p style='color:#aaa; font-size:0.8rem;'>No history available.</p>";
         }
     }
 });
@@ -275,11 +287,11 @@ window.openCourse = async (courseId) => {
     if(lessons.length) window.playVideo(lessons[0].videoId, lessons[0].title, pl.firstChild);
 };
 
-// --- UI FIX: NO CONTROLS & FORCE REBUILD ---
+// --- REBUILD PLAYER & NO CONTROLS ---
 window.playVideo = (id, title, el) => {
     const wrapper = document.querySelector('.video-wrapper');
     
-    // 1. RE-CREATE IFRAME (Nuclear Fix)
+    // 1. RE-CREATE IFRAME if deleted
     let player = document.getElementById('mainPlayer');
     if (!player && wrapper) {
         player = document.createElement('iframe');
@@ -288,13 +300,10 @@ window.playVideo = (id, title, el) => {
         player.height = "100%";
         player.frameBorder = "0";
         player.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-        // removed allowFullscreen to match fs=0
         wrapper.appendChild(player);
     }
 
-    // 2. Play Video with NO CONTROLS
-    // controls=0 -> Hides bottom bar
-    // fs=0 -> Hides fullscreen button (since bar is hidden)
+    // 2. Load Video with controls=0 (Hides Controls)
     const embedUrl = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&showinfo=0&controls=0&iv_load_policy=3&fs=0`;
     
     if(player) player.src = embedUrl;

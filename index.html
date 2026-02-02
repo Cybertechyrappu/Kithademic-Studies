@@ -89,8 +89,8 @@
         .history-card:hover .play-overlay { opacity: 1; }
         
         /* Back Button Hover */
-        button[onclick*="switchTab"]:hover {
-            background: rgba(238, 187, 93, 0.1) !important;
+        button:hover {
+            opacity: 0.8;
         }
     </style>
 </head>
@@ -122,7 +122,7 @@
 
         <section id="classroom" class="page hidden">
             <div style="width: 95%; max-width: 1300px; margin: 0 auto 15px auto; text-align: left;">
-                <button onclick="switchTab(document.querySelectorAll('.nav-item')[1], 'courses')" 
+                <button onclick="goBackToCourses()" 
                         style="background: transparent; border: 1px solid var(--accent-gold); color: var(--accent-gold); padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
                     <i class="fas fa-arrow-left"></i> Back to Courses
                 </button>
@@ -131,8 +131,7 @@
             <div class="classroom-container">
                 <div class="video-area">
                     <div class="video-wrapper">
-                        <iframe id="mainPlayer" src="" width="100%" height="100%" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
+                        </div>
                     <h2 id="videoTitle">Select a Class to Start</h2>
                 </div>
 
@@ -144,9 +143,7 @@
                     <div id="playlistItems" class="playlist-items"></div>
                 </div>
             </div>
-            
-            </section>
-
+        </section>
 
     </main>
 

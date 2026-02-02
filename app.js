@@ -66,31 +66,38 @@ window.closeAuthModal = () => {
 
 window.switchTab = (element, pageId) => {
     
-    // --- AGGRESSIVE FIX: STOP VIDEO ---
-    // Stops audio/video immediately when leaving classroom
-    if (pageId === 'home' || pageId === 'courses') {
+    // --- FORCE STOP VIDEO FIX ---
+    // Whenever we go to a page that IS NOT 'classroom', we kill the video.
+    if (pageId !== 'classroom') {
         const player = document.getElementById('mainPlayer');
         if(player) {
-            player.src = ""; // Wipes source
-            player.removeAttribute('src'); // Fully unloads
+            // "about:blank" forces the iframe to unload the YouTube player completely
+            player.src = "about:blank"; 
         }
         const titleEl = document.getElementById('videoTitle');
         if(titleEl) titleEl.innerText = "Select a Class to Start";
     }
-    // ----------------------------------
+    // ----------------------------
 
     if(pageId) showPage(pageId);
-    const bubble = document.getElementById('navBubble');
-    bubble.style.width = `${element.offsetWidth}px`;
-    bubble.style.transform = `translateX(${element.offsetLeft}px)`;
-    bubble.classList.add('initialized'); 
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    element.classList.add('active');
+    
+    // Safety check for element (prevents crash if element is missing)
+    if (element) {
+        const bubble = document.getElementById('navBubble');
+        if(bubble) {
+            bubble.style.width = `${element.offsetWidth}px`;
+            bubble.style.transform = `translateX(${element.offsetLeft}px)`;
+            bubble.classList.add('initialized'); 
+        }
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+    }
 };
 
 document.addEventListener("DOMContentLoaded", () => {
     const activeBtn = document.querySelector('.nav-item.active'); 
     if(activeBtn) setTimeout(() => window.switchTab(activeBtn, null), 100); 
+    // Render initially for guests
     renderCourses(null);
 });
 
@@ -113,7 +120,6 @@ onAuthStateChanged(auth, async (user) => {
     const loginView = document.getElementById('loginContent');
     const profileView = document.getElementById('profileContent');
 
-    // 1. UPDATE UI IMMEDIATELY
     if (user) {
         const photoURL = user.photoURL || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
         if(navIconDiv) navIconDiv.innerHTML = `<img src="${photoURL}" class="nav-user-img" alt="User">`;
@@ -137,10 +143,8 @@ onAuthStateChanged(auth, async (user) => {
         if(profileView) profileView.classList.add('hidden');
     }
 
-    // 2. RENDER COURSES
     await renderCourses(user);
 
-    // 3. LOAD HISTORY
     if (user) {
         try {
             await loadHistory(user);
@@ -276,10 +280,7 @@ window.openCourse = async (courseId) => {
 
 // --- UI FIX: PROFESSIONAL PLAYER ---
 window.playVideo = (id, title, el) => {
-    // 1. modestbranding=1 -> Hides logo
-    // 2. rel=0 -> No random recommended videos
-    // 3. iv_load_policy=3 -> Hides annotations
-    // 4. fs=1 -> Allows fullscreen
+    // Professional parameters enabled
     const embedUrl = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&showinfo=0&controls=1&iv_load_policy=3&fs=1`;
     
     document.getElementById('mainPlayer').src = embedUrl;
@@ -288,7 +289,6 @@ window.playVideo = (id, title, el) => {
     document.querySelectorAll('.lesson-item').forEach(x => x.classList.remove('active'));
     if(el) el.classList.add('active');
 
-    // SAVE HISTORY
     saveHistory(id, title);
 };
 

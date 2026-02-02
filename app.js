@@ -32,8 +32,8 @@ const adminPhone = "919526755210";
 const courses = [
     { 
         id: "c_01",
-        title: "പ്രാക്റ്റിക്കൽ ഫിഖ്ഹ് കോഴ്സ്", 
-        price: 200, 
+        title: "പ്രാക്റ്റിക്കൽ ഫിഖ്ഹ് കോഴ്സ്",
+        price: "200",
         desc: "ഫത്ഹുൽ മുഈൻ അടിസ്ഥാനത്തിൽ",
         features: ["ട്യൂട്ടർ: യാസീൻ സിദ്ദീഖ് നൂറാനി", "ക്ലാസ് രീതി: റെക്കോർഡ് ചെയ്ത വീഡിയോകൾ", "ക്ലാസ്സുകളുടെ എണ്ണം: ആഴ്ചയിൽ 4"]
     },
@@ -99,7 +99,11 @@ onAuthStateChanged(auth, async (user) => {
     const loginView = document.getElementById('loginContent');
     const profileView = document.getElementById('profileContent');
 
+    // 1. Render Public Courses
     await renderCourses(user);
+
+    // 2. Render My Courses (Homepage)
+    await renderMyCourses(user);
 
     if (user) {
         // Logged In
@@ -115,12 +119,11 @@ onAuthStateChanged(auth, async (user) => {
             document.getElementById('userEmail').innerText = user.email;
         }
 
-        // Load History (With Error Handling)
+        // Load History
         try {
             await loadHistory(user);
         } catch (e) {
             console.error("History load failed:", e);
-            document.getElementById('historyList').innerHTML = "<p style='color:red; font-size:0.8rem;'>Error loading history.</p>";
         }
 
         await checkAndCreateProfile(user);
@@ -131,6 +134,11 @@ onAuthStateChanged(auth, async (user) => {
         
         if(loginView) loginView.classList.remove('hidden');
         if(profileView) profileView.classList.add('hidden');
+        
+        // Hide My Courses Section
+        const myCoursesSection = document.getElementById('myCoursesSection');
+        if(myCoursesSection) myCoursesSection.classList.add('hidden');
+        
         showPage('home'); 
     }
 });
@@ -205,6 +213,51 @@ async function renderCourses(user) {
     });
 }
 
+// NEW: RENDER MY COURSES ON HOME
+async function renderMyCourses(user) {
+    const section = document.getElementById('myCoursesSection');
+    const list = document.getElementById('myCoursesList');
+    
+    if (!section || !list) return;
+
+    // 1. Safety Check: User must be logged in
+    if (!user) {
+        section.classList.add('hidden');
+        return;
+    }
+
+    // 2. Check Subscription Status
+    const sub = await checkSubscription(user.uid);
+    
+    // 3. If NO access, hide the section
+    if (!sub.hasAccess) {
+        section.classList.add('hidden');
+        return;
+    }
+
+    // 4. If ACCESS GRANTED, show the section and render cards
+    section.classList.remove('hidden');
+    list.innerHTML = "";
+
+    courses.forEach(c => {
+        // Show paid courses in "My Learning" if they have access
+        const div = document.createElement('div');
+        div.className = 'course-card';
+        
+        div.innerHTML = `
+            <div class="card-header" style="background:rgba(238, 187, 93, 0.1);">
+                <h3>${c.title}</h3>
+                <span class="badge" style="background:#4CAF50; color:white;">Active</span>
+            </div>
+            <div class="card-footer" style="justify-content:center; padding:15px;">
+                <button class="btn-gold" style="width:100%" onclick="openCourse('${c.id}')">
+                    <i class="fas fa-play"></i> Continue Learning
+                </button>
+            </div>`;
+        list.appendChild(div);
+    });
+}
+
 window.buyCourse = (courseId) => {
     const user = auth.currentUser;
     if (!user) { alert("Please Sign In."); openAuthModal(); return; }
@@ -256,12 +309,10 @@ window.playVideo = (id, title, el) => {
     saveHistory(id, title);
 };
 
-// --- PREMIUM HISTORY LOGIC (Fixed "Stuck on Loading") ---
 async function saveHistory(videoId, title) {
     const user = auth.currentUser;
     if(!user) return;
     
-    // Save to Firestore
     const historyRef = doc(db, "users", user.uid, "watchHistory", videoId);
     try {
         await setDoc(historyRef, {
@@ -269,7 +320,6 @@ async function saveHistory(videoId, title) {
             title: title,
             timestamp: serverTimestamp()
         });
-        // Reload list instantly
         loadHistory(user);
     } catch(e) { console.log("History save error", e); }
 }
@@ -278,8 +328,6 @@ async function loadHistory(user) {
     const list = document.getElementById('historyList');
     if(!list) return;
 
-    // We remove 'orderBy' from the query to prevent "Missing Index" errors
-    // Instead, we sort the data in JavaScript
     const q = query(
         collection(db, "users", user.uid, "watchHistory"), 
         limit(10) 
@@ -293,24 +341,20 @@ async function loadHistory(user) {
         return;
     }
 
-    // Convert to array and Sort by Timestamp manually (Newest first)
     const historyItems = [];
     snapshot.forEach(doc => {
         historyItems.push(doc.data());
     });
     
     historyItems.sort((a, b) => {
-        // Safe check for null timestamps (can happen immediately after write)
         const timeA = a.timestamp ? a.timestamp.seconds : Date.now()/1000;
         const timeB = b.timestamp ? b.timestamp.seconds : Date.now()/1000;
         return timeB - timeA;
     });
 
-    // Render Cards
     historyItems.forEach(data => {
         const div = document.createElement('div');
         div.className = 'history-card';
-        // Use YouTube Thumbnail API
         const thumbUrl = `https://img.youtube.com/vi/${data.videoId}/mqdefault.jpg`;
         
         div.innerHTML = `
@@ -344,23 +388,6 @@ function findAndPlayVideo(videoId) {
         }
     }
 }
-
-// ==========================================
-// 7. ADMIN & PWA
-// ==========================================
-window.openAdminCheck = () => {
-    const password = prompt("Enter Admin Password:");
-    if (password === "syd@123%") { showPage('adminPanel'); } 
-    else if (password !== null) { alert("Access Denied"); }
-};
-
-window.addMonth = async () => {
-    const uid = document.getElementById('studentId').value;
-    if (!uid) return alert("Enter UID");
-    const future = new Date(); future.setDate(future.getDate() + 90);
-    await updateDoc(doc(db, "users", uid), { expiryDate: future.toISOString() });
-    alert("Success! 90 Days Added.");
-};
 
 // --- PWA INSTALL ---
 let deferredPrompt;

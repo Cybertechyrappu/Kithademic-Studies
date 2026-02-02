@@ -2,7 +2,7 @@
     --primary-green: #022c22;
     --deep-bg: #001a14;
     --accent-gold: #eebb5d;
-    --accent-gold1: #eebb5d;
+    --accent-gold1: #ffffff;
     --text-light: #ffffff;
     
     --glass-bg: rgba(255, 255, 255, 0.05);
@@ -94,11 +94,11 @@ body {
 /* --- HERO --- */
 .hero-content { 
     margin-top: 10vh; padding: 40px;
-    background: rgba(0,0,0,0.2); border-radius: 20px; backdrop-filter: blur(5px);
+    background: rgba(0,0,0,0); border-radius: 20px; backdrop-filter: blur(5px);
 }
 .hero-content h1 { font-family: 'Amiri', serif; font-size: 2.5rem; color: var(--accent-gold); margin-bottom: 10px; }
 .hero-content h2 { font-size: 3rem; margin-bottom: 10px; }
-.gold-text { background: var(--accent-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.gold-text { background: var(--accent-gold1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .gold-text1 { background: var(--text-light); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
 /* --- BUTTONS --- */
@@ -182,11 +182,11 @@ body {
 /* --- MODAL --- */
 .modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 2000;
+    background: rgba(0,0,0,0); display: flex; justify-content: center; align-items: center; z-index: 2000;
     backdrop-filter: blur(5px);
 }
 .modal-content {
-    background: rgba(10, 30, 25, 0.95);
+    background: rgba(255,255,255,0.3);
     padding: 40px; border-radius: 20px; border: 1px solid var(--gold-border);
     width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 20px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.5);

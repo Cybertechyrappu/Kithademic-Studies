@@ -210,3 +210,13 @@ body {
     .classroom-container { grid-template-columns: 1fr; }
     .playlist-area { height: 350px; }
 }
+
+/* Add this to the bottom of your CSS */
+.classroom-container {
+    /* (Existing styles...) */
+}
+
+/* Back Button Hover Effect */
+button[onclick*="switchTab"]:hover {
+    background: rgba(238, 187, 93, 0.1);
+}

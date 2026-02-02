@@ -37,6 +37,13 @@ const courses = [
         desc: "ഫത്ഹുൽ മുഈൻ അടിസ്ഥാനത്തിൽ",
         features: ["ട്യൂട്ടർ: യാസീൻ സിദ്ദീഖ് നൂറാനി", "ക്ലാസ് രീതി: റെക്കോർഡ് ചെയ്ത വീഡിയോകൾ", "ക്ലാസ്സുകളുടെ എണ്ണം: ആഴ്ചയിൽ 4"]
     },
+    { 
+        id: "c_02",
+        title: "അഖീദ കോഴ്സ്",
+        price: "0",
+        desc: "വിശ്വാസ കാര്യങ്ങളെ കുറിച്ചുള്ള പഠനം.",
+        features: ["ട്യൂട്ടർ: ഉസ്താദ്", "ക്ലാസ് രീതി: റെക്കോർഡ് ചെയ്ത വീഡിയോകൾ", "Free Course"]
+    }
 ];
 
 const courseContent = {
@@ -44,6 +51,10 @@ const courseContent = {
         { title: "Introduction to Course", videoId: "pWBPJlPFqRY" }, 
         { title: "Chapter 1: Basics", videoId: "KMT1J3Lg6h0" },
         { title: "Chapter 2: Advanced", videoId: "8jP8CC23ibY" }
+    ],
+    "c_02": [
+        { title: "Part-1 Aqeeda Foundation Course", videoId: "Mj2_llpeq_Q" }, 
+        { title: "Part-2 Aqeeda Foundation Course", videoId: "-FAi2iOkQF4" }
     ],
 };
 
@@ -200,29 +211,54 @@ async function checkSubscription(userId) {
 async function renderCourses(user) {
     const courseList = document.getElementById('courseList');
     if(!courseList) return;
+    
     let hasAccess = false;
     if (user) {
         courseList.innerHTML = '<p style="color:#aaa; text-align:center;">Checking subscription...</p>';
-        try { const sub = await checkSubscription(user.uid); hasAccess = sub.hasAccess; } catch(e){}
+        try { 
+            const sub = await checkSubscription(user.uid); 
+            hasAccess = sub.hasAccess; 
+        } catch(e){}
     }
+    
     courseList.innerHTML = ""; 
+    
     courses.forEach(c => {
         const div = document.createElement('div');
         div.className = 'course-card';
         const featuresHtml = c.features.map(f => `<li><i class="fas fa-check-circle"></i> ${f}</li>`).join('');
-        let actionButton = (c.price === 0 || hasAccess) 
-            ? `<button class="btn-gold" style="font-size:0.8rem;" onclick="openCourse('${c.id}')"><i class="fas fa-play"></i> Open</button>`
-            : `<button class="btn-buy" onclick="buyCourse('${c.id}')">Buy</button>`;
+        
+        // --- BUTTON LOGIC CHANGED HERE ---
+        let actionButton = "";
+        const price = parseInt(c.price); // Convert to number for checking
+
+        // If price is 0 OR user has bought it -> Show "Open"
+        if (price === 0 || hasAccess) {
+            actionButton = `<button class="btn-gold" style="font-size:0.8rem;" onclick="openCourse('${c.id}')"><i class="fas fa-play"></i> Open</button>`;
+        } else {
+            // Otherwise -> Show "Buy"
+            actionButton = `<button class="btn-buy" onclick="buyCourse('${c.id}')">Buy</button>`;
+        }
+
+        const priceDisplay = price === 0 ? "FREE" : `₹${c.price}`;
+        const badgeDisplay = price === 0 ? "FREE" : "Paid Course";
 
         div.innerHTML = `
-            <div class="card-header"><h3>${c.title}</h3><span class="badge">${c.price === 0 ? "FREE" : "3-Month Plan"}</span></div>
-            <p class="desc">${c.desc}</p><ul class="features">${featuresHtml}</ul>
-            <div class="card-footer"><b class="price">₹${c.price}</b><div style="display:flex; gap:10px;">${actionButton}</div></div>`;
+            <div class="card-header">
+                <h3>${c.title}</h3>
+                <span class="badge" style="${price === 0 ? 'background:#28745;' : ''}">${badgeDisplay}</span>
+            </div>
+            <p class="desc">${c.desc}</p>
+            <ul class="features">${featuresHtml}</ul>
+            <div class="card-footer">
+                <b class="price">${priceDisplay}</b>
+                <div style="display:flex; gap:10px;">${actionButton}</div>
+            </div>`;
         courseList.appendChild(div);
     });
 }
 
-// --- UPDATED WHATSAPP MESSAGE LOGIC ---
+// --- WHATSAPP MESSAGE LOGIC ---
 window.buyCourse = (courseId) => {
     const user = auth.currentUser;
     if (!user) { alert("Please Sign In."); openAuthModal(); return; }
@@ -236,11 +272,19 @@ window.buyCourse = (courseId) => {
 };
 
 window.openCourse = async (courseId) => {
-    if (!auth.currentUser) { alert("Login first."); openAuthModal(); return; }
+    // 1. CHECK LOGIN (Required for everyone, even free courses)
+    if (!auth.currentUser) { alert("Please login to continue."); openAuthModal(); return; }
+    
     const course = courses.find(c => c.id === courseId);
-    if (course.price > 0) {
+    const price = parseInt(course.price);
+
+    // 2. CHECK SUBSCRIPTION ONLY IF PAID COURSE
+    if (price > 0) {
         const sub = await checkSubscription(auth.currentUser.uid);
-        if (!sub.hasAccess) { if(confirm("Renew?")) buyCourse(courseId); return; }
+        if (!sub.hasAccess) { 
+            if(confirm("Subscription Expired. Renew now?")) buyCourse(courseId); 
+            return; 
+        }
     }
     
     // Switch to Classroom
@@ -248,6 +292,8 @@ window.openCourse = async (courseId) => {
     document.getElementById('classroom').classList.remove('hidden');
     
     const lessons = courseContent[courseId];
+    if (!lessons) { alert("No content added yet."); return; }
+
     const pl = document.getElementById('playlistItems');
     pl.innerHTML = "";
     lessons.forEach((l, i) => {

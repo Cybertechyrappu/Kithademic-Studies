@@ -24,9 +24,39 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
-const adminPhone = "919544268849"; 
+const adminPhone = ""; 
 
+// ==========================================
+// 2. DATA
+// ==========================================
+const courses = [
+    { 
+        id: "c_01",
+        title: "പ്രാക്റ്റിക്കൽ ഫിഖ്ഹ് കോഴ്സ്",
+        price: "200",
+        desc: "KITHADEMIC STUDIES നിങ്ങൾക്കായി ഒരുക്കുന്നു, പ്രായോഗിക ജീവിതത്തിൽ ഉപകാരപ്പെടും വിധം ഫിഖ്ഹിനെ ലളിതമായി പരിചയപ്പെടുത്തുന്ന ഒരു പ്രത്യേക കോഴ്സ്. ഫത്ഹുൽ മുഈൻ അടിസ്ഥാനമാക്കി തയ്യാറാക്കിയ ഈ കോഴ്സിൻ്റെ പ്രധാന ലക്ഷ്യം കർമ്മശാസ്ത്രത്തെ നിങ്ങളുടെ ദൈനംദിന ജീവിതവുമായി ബന്ധിപ്പിക്കുക എന്നതാണ്.",
+        features: ["ട്യൂട്ടർ: യാസീൻ സിദ്ദീഖ് നൂറാനി", "ക്ലാസ് രീതി: റെക്കോർഡ് ചെയ്ത വീഡിയോകൾ", "ക്ലാസ്സുകളുടെ എണ്ണം: ആഴ്ചയിൽ 4","സബ്സ്ക്രിപ്ഷൻ ഫീ: 3 മാസത്തേക്ക് ₹200 (മുൻകൂട്ടി അടയ്ക്കുക)"]
+    },
+    { 
+        id: "c_02",
+        title: "അഖീദ കോഴ്സ്",
+        price: "0",
+        desc: "വിശ്വാസ കാര്യങ്ങളെ കുറിച്ചുള്ള പഠനം.",
+        features: ["ട്യൂട്ടർ: യാസീൻ സിദ്ദീഖ് നൂറാനി", "ക്ലാസ് രീതി: റെക്കോർഡ് ചെയ്ത വീഡിയോകൾ", "Free Course"]
+    }
+];
 
+const courseContent = {
+    "c_01": [
+        { title: "Introduction to Course", videoId: "pWBPJlPFqRY" }, 
+        { title: "Chapter 1: Basics", videoId: "KMT1J3Lg6h0" },
+        { title: "Chapter 2: Advanced", videoId: "8jP8CC23ibY" }
+    ],
+    "c_02": [
+        { title: "Part-1 Aqeeda Foundation Course", videoId: "Mj2_llpeq_Q" }, 
+        { title: "Part-2 Aqeeda Foundation Course", videoId: "-FAi2iOkQF4" }
+    ],
+};
 
 // ==========================================
 // 3. UI NAVIGATION & LOGIC

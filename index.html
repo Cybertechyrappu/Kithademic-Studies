@@ -8,6 +8,84 @@
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        .history-container {
+            margin-top: 20px;
+            text-align: left;
+            width: 100%;
+        }
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .history-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .history-card:hover {
+            background: rgba(238, 187, 93, 0.1);
+            border-color: var(--accent-gold);
+            transform: translateX(5px);
+        }
+        .history-thumb {
+            width: 100px;
+            height: 56px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        .history-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .history-title {
+            font-size: 0.9rem;
+            color: #fff;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+        .history-meta {
+            font-size: 0.75rem;
+            color: #aaa;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .play-overlay {
+            position: absolute;
+            left: 38px;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: 0.3s;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+        }
+        .history-card:hover .play-overlay { opacity: 1; }
+        
+        button:hover { opacity: 0.8; }
+    </style>
 </head>
 <body>
 
@@ -17,11 +95,10 @@
         </div>
     </div>
 
-    <div class="parallax-bg">
-        <div class="grid-3d"></div>
-    </div>
+    <div class="parallax-bg"></div>
 
     <main id="app">
+
         <section id="home" class="page active">
             <div class="hero-content">
                 <h1 class="arabic-font">بِسْمِ ٱللَّٰهِ</h1>
@@ -46,7 +123,8 @@
 
             <div class="classroom-container">
                 <div class="video-area">
-                    <div class="video-wrapper"></div>
+                    <div class="video-wrapper">
+                        </div>
                     <h2 id="videoTitle">Select a Class to Start</h2>
                 </div>
 
@@ -59,14 +137,15 @@
                 </div>
             </div>
         </section>
+
     </main>
 
     <nav class="bottom-nav">
         <div id="navBubble" class="nav-indicator"></div>
-        <a href="#home" class="nav-item active" onclick="switchTab(this, 'home')">
+        <a href="#" class="nav-item active" onclick="switchTab(this, 'home')">
             <i class="fas fa-home"></i> <span class="label">Home</span>
         </a>
-        <a href="#courses" class="nav-item" onclick="switchTab(this, 'courses')">
+        <a href="#" class="nav-item" onclick="switchTab(this, 'courses')">
             <i class="fas fa-book-open"></i> <span class="label">Courses</span>
         </a>
         <a href="#" class="nav-item" onclick="switchTab(this, null); openAuthModal()">
@@ -105,12 +184,13 @@
                     <button id="installBtn" class="btn-primary" onclick="installApp()" style="display:none; border-color:var(--accent-gold); color:var(--accent-gold);">
                         <i class="fas fa-download"></i> Install App
                     </button>
+
                     <button class="btn-primary" onclick="handleSignOut()" style="width:100%; border-color:#ff4444; color:#ff4444;">Log Out</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script type="module" src="app.js?v=3"></script>
+    <script type="module" src="app.js?v=2"></script>
 </body>
 </html>

@@ -322,7 +322,7 @@ window.playVideo = (id, title, el) => {
         wrapper.appendChild(player);
     }
 
-    player.src = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&showinfo=0&controls=0&fs=1`;
+    player.src = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&showinfo=0&controls=1&fs=1`;
     document.getElementById('videoTitle').innerText = title;
 
     document.querySelectorAll('.lesson-item').forEach(x => x.classList.remove('active'));

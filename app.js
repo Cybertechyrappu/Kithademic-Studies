@@ -7,7 +7,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { 
     getFirestore, doc, getDoc, setDoc, updateDoc, 
-    collection, query, orderBy, limit, getDocs, serverTimestamp 
+    collection, query, limit, getDocs, serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -27,13 +27,14 @@ const googleProvider = new GoogleAuthProvider();
 const adminPhone = ""; 
 
 // ==========================================
-// 2. DATA
+// 2. DATA (Added 'isPurchasable' flag)
 // ==========================================
 const courses = [
     { 
         id: "c_01",
         title: "പ്രാക്റ്റിക്കൽ ഫിഖ്ഹ് കോഴ്സ്",
         price: "200",
+        isPurchasable: true, // SPECIFIC BUY OPTION ENABLED
         desc: "KITHADEMIC STUDIES നിങ്ങൾക്കായി ഒരുക്കുന്നു, പ്രായോഗിക ജീവിതത്തിൽ ഉപകാരപ്പെടും വിധം ഫിഖ്ഹിനെ ലളിതമായി പരിചയപ്പെടുത്തുന്ന ഒരു പ്രത്യേക കോഴ്സ്. ഫത്ഹുൽ മുഈൻ അടിസ്ഥാനമാക്കി തയ്യാറാക്കിയ ഈ കോഴ്സിൻ്റെ പ്രധാന ലക്ഷ്യം കർമ്മശാസ്ത്രത്തെ നിങ്ങളുടെ ദൈനംദിന ജീവിതവുമായി ബന്ധിപ്പിക്കുക എന്നതാണ്.",
         features: ["ട്യൂട്ടർ: യാസീൻ സിദ്ദീഖ് നൂറാനി", "ക്ലാസ് രീതി: റെക്കോർഡ് ചെയ്ത വീഡിയോകൾ", "ക്ലാസ്സുകളുടെ എണ്ണം: ആഴ്ചയിൽ 4","സബ്സ്ക്രിപ്ഷൻ ഫീ: 3 മാസത്തേക്ക് ₹200 (മുൻകൂട്ടി അടയ്ക്കുക)"]
     },
@@ -41,8 +42,17 @@ const courses = [
         id: "c_02",
         title: "അഖീദ കോഴ്സ്",
         price: "0",
+        isPurchasable: false, // Free courses handle this automatically, but explicitly marking false
         desc: "വിശ്വാസ കാര്യങ്ങളെ കുറിച്ചുള്ള പഠനം.",
         features: ["ട്യൂട്ടർ: യാസീൻ സിദ്ദീഖ് നൂറാനി", "ക്ലാസ് രീതി: റെക്കോർഡ് ചെയ്ത വീഡിയോകൾ", "Free Course"]
+    },
+    { 
+        id: "c_03",
+        title: "Upcoming Special Class",
+        price: "150",
+        isPurchasable: false, // SPECIFIC BUY OPTION DISABLED (Will show as Coming Soon)
+        desc: "An advanced look into specialized topics. Enrollment is currently closed.",
+        features: ["ട്യൂട്ടർ: യാസീൻ സിദ്ദീഖ് നൂറാനി", "Live + Recorded", "Enrollment Closed"]
     }
 ];
 
@@ -56,13 +66,12 @@ const courseContent = {
         { title: "Part-1 Aqeeda Foundation Course", videoId: "Mj2_llpeq_Q" }, 
         { title: "Part-2 Aqeeda Foundation Course", videoId: "-FAi2iOkQF4" }
     ],
+    "c_03": []
 };
 
 // ==========================================
 // 3. UI NAVIGATION & LOGIC
 // ==========================================
-
-// Helper: Kill Video (Stops Audio)
 const killVideo = () => {
     const wrapper = document.querySelector('.video-wrapper');
     if (wrapper) wrapper.innerHTML = ""; 
@@ -74,33 +83,20 @@ window.showPage = (pageId) => {
     document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
     const target = document.getElementById(pageId);
     if(target) target.classList.remove('hidden');
+    // Smooth scroll to top when changing pages
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 window.openAuthModal = () => document.getElementById('authModal').classList.remove('hidden');
 
-// --- FIX: GO HOME ON CLOSE ---
 window.closeAuthModal = () => {
     document.getElementById('authModal').classList.add('hidden');
-
-    // Find the Home Button (Index 0) and click it virtually
     const homeBtn = document.querySelectorAll('.nav-item')[0];
-    if (homeBtn) {
-        window.switchTab(homeBtn, 'home');
-    }
-};
-
-window.goBackToCourses = () => {
-    killVideo();
-    const coursesBtn = document.querySelectorAll('.nav-item')[1]; 
-    window.switchTab(coursesBtn, 'courses');
+    if (homeBtn) window.switchTab(homeBtn, 'home');
 };
 
 window.switchTab = (element, pageId) => {
-    // If leaving classroom, destroy video
-    if (pageId !== 'classroom') {
-        killVideo();
-    }
-
+    if (pageId !== 'classroom') killVideo();
     if(pageId) showPage(pageId);
 
     if (element) {
@@ -119,7 +115,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const activeBtn = document.querySelector('.nav-item.active'); 
     if(activeBtn) setTimeout(() => window.switchTab(activeBtn, null), 100); 
 
-    // Back Button Logic
     const backBtn = document.getElementById('backToCoursesBtn');
     if(backBtn) {
         backBtn.addEventListener('click', () => {
@@ -138,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
 window.handleGoogleAuth = async () => {
     try {
         await signInWithPopup(auth, googleProvider);
-        closeAuthModal(); // This will now auto-redirect to Home
+        closeAuthModal(); 
     } catch (error) {
         console.error(error);
         alert("Login Error: " + error.message);
@@ -176,7 +171,7 @@ onAuthStateChanged(auth, async (user) => {
 
 window.handleSignOut = () => {
     signOut(auth).then(() => {
-        closeAuthModal(); // Will go to Home
+        closeAuthModal();
         alert("Logged Out Successfully");
         window.location.reload();
     }).catch((error) => alert("Error: " + error.message));
@@ -189,19 +184,11 @@ async function checkAndCreateProfile(user) {
     try {
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
-        
-        // 1. Prepare Data (Get Name from Google)
-        const userData = { 
-            displayName: user.displayName || "Student", 
-            email: user.email, 
-            uid: user.uid 
-        };
+        const userData = { displayName: user.displayName || "Student", email: user.email, uid: user.uid };
 
         if (!userSnap.exists()) {
-            // 2. New User: Create Profile
             await setDoc(userRef, { ...userData, expiryDate: null });
         } else {
-            // 3. Existing User: UPDATE Name (Crucial for Admin Panel to see names)
             await updateDoc(userRef, { displayName: userData.displayName, email: userData.email });
         }
     } catch(e) { console.error("Profile Error:", e); }
@@ -242,16 +229,17 @@ async function renderCourses(user) {
         div.className = 'course-card';
         const featuresHtml = c.features.map(f => `<li><i class="fas fa-check-circle"></i> ${f}</li>`).join('');
 
-        // --- BUTTON LOGIC ---
         let actionButton = "";
         const price = parseInt(c.price);
 
-        // If price is 0 OR user has bought it -> Show "Open"
+        // MODIFIED LOGIC: Check explicit `isPurchasable` property
         if (price === 0 || hasAccess) {
             actionButton = `<button class="btn-gold" style="font-size:0.8rem;" onclick="openCourse('${c.id}')"><i class="fas fa-play"></i> Open</button>`;
-        } else {
-            // Otherwise -> Show "Buy"
+        } else if (c.isPurchasable) {
             actionButton = `<button class="btn-buy" onclick="buyCourse('${c.id}')">Buy</button>`;
+        } else {
+            // Disabled state for non-purchasable specific courses
+            actionButton = `<button class="btn-disabled" disabled>Closed</button>`;
         }
 
         const priceDisplay = price === 0 ? "FREE" : `₹${c.price}`;
@@ -272,41 +260,42 @@ async function renderCourses(user) {
     });
 }
 
-// --- WHATSAPP MESSAGE LOGIC ---
 window.buyCourse = (courseId) => {
     const user = auth.currentUser;
     if (!user) { alert("Please Sign In."); openAuthModal(); return; }
 
     const course = courses.find(c => c.id === courseId);
-    const userName = user.displayName || "Student";
+    
+    // Safety check just in case
+    if (!course.isPurchasable) { alert("This course is currently not available for purchase."); return; }
 
+    const userName = user.displayName || "Student";
     const msg = `${userName}%0aI want to buy: *${course.title}*.%0aPrice: ₹${course.price}.%0aMy Email: ${user.email}%0aMy UID: ${user.uid}%0a%0aPlease send UPI details.`;
 
     window.open(`https://wa.me/${adminPhone}?text=${msg}`, '_blank');
 };
 
 window.openCourse = async (courseId) => {
-    // 1. CHECK LOGIN (Required for everyone)
     if (!auth.currentUser) { alert("Please login to continue."); openAuthModal(); return; }
 
     const course = courses.find(c => c.id === courseId);
     const price = parseInt(course.price);
 
-    // 2. CHECK SUBSCRIPTION ONLY IF PAID COURSE
     if (price > 0) {
         const sub = await checkSubscription(auth.currentUser.uid);
         if (!sub.hasAccess) { 
-            if(confirm("Subscription Expired. Renew now?")) buyCourse(courseId); 
+            if(course.isPurchasable && confirm("Subscription Expired. Renew now?")) buyCourse(courseId); 
+            else if (!course.isPurchasable) alert("Subscription Expired. Renewals are currently closed.");
             return; 
         }
     }
 
-    // Switch to Classroom
     document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
     document.getElementById('classroom').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Smooth scroll top
 
     const lessons = courseContent[courseId];
-    if (!lessons) { alert("No content added yet."); return; }
+    if (!lessons || lessons.length === 0) { alert("No content added yet."); return; }
 
     const pl = document.getElementById('playlistItems');
     pl.innerHTML = "";
@@ -327,8 +316,6 @@ window.playVideo = (id, title, el) => {
     if (!player && wrapper) {
         player = document.createElement('iframe');
         player.id = 'mainPlayer';
-        player.width = "100%";
-        player.height = "100%";
         player.frameBorder = "0";
         player.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
         player.allowFullscreen = true;

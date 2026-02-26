@@ -10,82 +10,84 @@
     <link rel="stylesheet" href="style.css">
 
     <style>
-        .history-container {
-            margin-top: 20px;
-            text-align: left;
-            width: 100%;
-        }
-        .history-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-height: 250px;
-            overflow-y: auto;
-            padding-right: 5px;
-        }
-        .history-card {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .history-card:hover {
-            background: rgba(238, 187, 93, 0.1);
-            border-color: var(--accent-gold);
-            transform: translateX(5px);
-        }
-        .history-thumb {
-            width: 100px;
-            height: 56px;
-            border-radius: 8px;
-            object-fit: cover;
-            flex-shrink: 0;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-        .history-info {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            overflow: hidden;
-        }
-        .history-title {
-            font-size: 0.9rem;
-            color: #fff;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: 4px;
-        }
-        .history-meta {
-            font-size: 0.75rem;
-            color: #aaa;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .play-overlay {
-            position: absolute;
-            left: 38px;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            color: #fff;
-            font-size: 1.2rem;
-            opacity: 0;
-            transition: 0.3s;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.8);
-        }
-        .history-card:hover .play-overlay { opacity: 1; }
+        .history-container { margin-top: 20px; text-align: left; width: 100%; }
         
+        .history-list { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            max-height: 240px; /* Controls the height before scrolling starts */
+            overflow-y: auto; 
+            padding-right: 8px; 
+        }
+        
+        /* Custom Scrollbar for the History List */
+        .history-list::-webkit-scrollbar { width: 4px; }
+        .history-list::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+        .history-list::-webkit-scrollbar-thumb { background: var(--accent-gold); border-radius: 10px; }
+
+        .history-card { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 12px; 
+            padding: 8px; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            position: relative; 
+            overflow: hidden; 
+            flex-shrink: 0; /* THIS FIXES THE BUG! Prevents the card from squishing */
+        }
+        
+        .history-card:hover { 
+            background: rgba(238, 187, 93, 0.1); 
+            border-color: var(--accent-gold); 
+            transform: translateX(5px); 
+        }
+        
+        .history-thumb { 
+            width: 100px; 
+            height: 56px; 
+            border-radius: 8px; 
+            object-fit: cover; 
+            flex-shrink: 0; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+        }
+        
+        .history-info { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            overflow: hidden; 
+        }
+        
+        .history-title { 
+            font-size: 0.9rem; 
+            color: #fff; 
+            font-weight: 600; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            margin-bottom: 4px; 
+        }
+        
+        .play-overlay { 
+            position: absolute; 
+            left: 38px; top: 50%; 
+            transform: translate(-50%, -50%); 
+            color: #fff; 
+            font-size: 1.2rem; 
+            opacity: 0; 
+            transition: 0.3s; 
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8); 
+        }
+        
+        .history-card:hover .play-overlay { opacity: 1; }
         button:hover { opacity: 0.8; }
     </style>
+
 </head>
 <body>
 
@@ -98,33 +100,42 @@
     <div class="parallax-bg"></div>
 
     <main id="app">
-
         <section id="home" class="page active">
             <div class="hero-content">
                 <h1 class="arabic-font">بِسْمِ ٱللَّٰهِ</h1>
                 <h2>Welcome to <span class="gold-text">Kithademic Studies</span></h2>
                 <p>Knowledge is the light of the heart.<br>Excellence in Islamic & Academic Education.</p>
-                <button class="btn-primary" onclick="switchTab(document.querySelectorAll('.nav-item')[1], 'courses')">Start Learning</button>
+                <button class="btn-primary" onclick="handleGetStarted()">Get Started</button>
             </div>
         </section>
 
         <section id="courses" class="page hidden">
-            <h2 class="section-title"><span class="gold-text">Premium Courses</span></h2>
+            <h2 class="section-title" style="margin-bottom: 15px;"><span class="gold-text">Our Courses</span></h2>
+            
+            <div class="top-tab-nav">
+                <button class="top-tab-btn active" onclick="setCourseTab('premium', this)">Premium</button>
+                <button class="top-tab-btn" onclick="setCourseTab('free', this)">Free</button>
+            </div>
+
             <div class="course-grid" id="courseList"></div>
+        </section>
+
+        <section id="videos" class="page hidden">
+            <h2 class="section-title" style="margin-bottom: 25px;"><span class="gold-text">Videos</span></h2>
+            <div class="video-grid" id="videoList"></div>
         </section>
 
         <section id="classroom" class="page hidden">
             <div style="width: 95%; max-width: 1300px; margin: 0 auto 15px auto; text-align: left;">
-                <button id="backToCoursesBtn" 
+                <button id="backBtn" 
                         style="background: transparent; border: 1px solid var(--accent-gold); color: var(--accent-gold); padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
-                    <i class="fas fa-arrow-left"></i> Back to Courses
+                    <i class="fas fa-arrow-left"></i> Back
                 </button>
             </div>
 
             <div class="classroom-container">
                 <div class="video-area">
-                    <div class="video-wrapper">
-                        </div>
+                    <div class="video-wrapper"></div>
                     <h2 id="videoTitle">Select a Class to Start</h2>
                 </div>
 
@@ -137,7 +148,6 @@
                 </div>
             </div>
         </section>
-
     </main>
 
     <nav class="bottom-nav">
@@ -147,6 +157,9 @@
         </a>
         <a href="#" class="nav-item" onclick="switchTab(this, 'courses')">
             <i class="fas fa-book-open"></i> <span class="label">Courses</span>
+        </a>
+        <a href="#" class="nav-item" onclick="switchTab(this, 'videos')">
+            <i class="fas fa-play-circle"></i> <span class="label">Videos</span>
         </a>
         <a href="#" class="nav-item" onclick="switchTab(this, null); openAuthModal()">
             <div id="navAuthIcon" class="icon-container"><i class="fas fa-user"></i></div>
@@ -184,13 +197,21 @@
                     <button id="installBtn" class="btn-primary" onclick="installApp()" style="display:none; border-color:var(--accent-gold); color:var(--accent-gold);">
                         <i class="fas fa-download"></i> Install App
                     </button>
-
                     <button class="btn-primary" onclick="handleSignOut()" style="width:100%; border-color:#ff4444; color:#ff4444;">Log Out</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script type="module" src="app.js?v=2"></script>
+    <div id="customDialog" class="modal hidden" style="z-index: 3000;">
+        <div class="modal-content" style="text-align: center; padding: 30px;">
+            <h2 id="dialogTitle" class="gold-text" style="margin-bottom: 15px;">Notice</h2>
+            <p id="dialogMessage" style="color: #ddd; margin-bottom: 25px; font-size: 0.95rem;"></p>
+            <div id="dialogButtons" style="display: flex; gap: 10px; justify-content: center;">
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js?v=4"></script>
 </body>
 </html>

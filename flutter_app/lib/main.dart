@@ -6,19 +6,23 @@ import 'package:kithademic_studies/ui/screens/home_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Note: For native Android/iOS, you must add google-services.json/GoogleService-Info.plist manually.
-  // For Web, provide your Firebase options here if not already configured via CLI.
-  await Firebase.initializeApp(
-    options: const FirebaseOptions(
-      apiKey: "AIzaSyDm97rTDsP1sELznlVKLogPBkMiy0fpc9c",
-      authDomain: "kithademic-studies.firebaseapp.com",
-      projectId: "kithademic-studies",
-      storageBucket: "kithademic-studies.firebasestorage.app",
-      messagingSenderId: "962734931999",
-      appId: "1:962734931999:web:3d335b466bafca1065552a",
-      measurementId: "G-NXT6ZVKHSH",
-    ),
-  );
+  try {
+    // Note: For native Android/iOS, you must add google-services.json/GoogleService-Info.plist manually.
+    // For Web, provide your Firebase options here if not already configured via CLI.
+    await Firebase.initializeApp(
+      options: const FirebaseOptions(
+        apiKey: "AIzaSyDm97rTDsP1sELznlVKLogPBkMiy0fpc9c",
+        authDomain: "kithademic-studies.firebaseapp.com",
+        projectId: "kithademic-studies",
+        storageBucket: "kithademic-studies.firebasestorage.app",
+        messagingSenderId: "962734931999",
+        appId: "1:962734931999:web:3d335b466bafca1065552a",
+        measurementId: "G-NXT6ZVKHSH",
+      ),
+    );
+  } catch (e) {
+    debugPrint("Firebase initialization failed. Native setup might be missing: $e");
+  }
   
   runApp(const MyApp());
 }

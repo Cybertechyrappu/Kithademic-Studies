@@ -1,14 +1,20 @@
 # Secrets & Config
 config.js
+admin/config.js
+!config.example.js
+!admin/config.example.js
 
 # Node / Modules
 node_modules/
-
-# OS / IDE
-.DS_Store
-.vscode/
-.idea/
-
-# Build
 dist/
-build/
+.env
+
+# Build outputs
+flutter_app/build/
+.dart_tool/
+.packages
+
+# Icons
+icon-*.png
+!icon-192.png
+!icon-512.png

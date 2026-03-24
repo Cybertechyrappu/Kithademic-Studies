@@ -7,7 +7,9 @@
     <link rel="manifest" href="manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 
     <style>
         .history-container { margin-top: 20px; text-align: left; width: 100%; }
@@ -92,8 +94,9 @@
 <body>
 
     <div class="top-brand">
-        <div class="logo">
-            <i class="fas fa-book-quran"></i> 
+        <div class="logo" style="display: flex; align-items: center; gap: 10px;">
+            <img src="icon-192.png" alt="Logo" style="width: 35px; border-radius: 5px;">
+            <span style="font-size: 1.2rem; display: none;">Kithademic</span>
         </div>
     </div>
 
@@ -102,6 +105,7 @@
     <main id="app">
         <section id="home" class="page active">
             <div class="hero-content">
+                <img src="icon-512.png" alt="Big Logo" style="width: 120px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 25px;">
                 <h1 class="arabic-font">بِسْمِ ٱللَّٰهِ</h1>
                 <h2>Welcome to <span class="gold-text">Kithademic Studies</span></h2>
                 <p>Knowledge is the light of the heart.<br>Excellence in Islamic & Academic Education.</p>
@@ -212,6 +216,7 @@
         </div>
     </div>
 
-    <script type="module" src="app.js?v=4"></script>
+    <script src="config.js"></script>
+    <script type="module" src="src/main.js"></script>
 </body>
 </html>

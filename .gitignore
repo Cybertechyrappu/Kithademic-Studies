@@ -1,2 +1,14 @@
-.gitignore
+# Secrets & Config
 config.js
+
+# Node / Modules
+node_modules/
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
+
+# Build
+dist/
+build/

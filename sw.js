@@ -1,6 +1,6 @@
 // Updated service worker with cache versioning, offline support, clean cache strategy, and better error handling
 
-const CACHE_NAME = 'v1';
+const CACHE_NAME = 'v2';
 const urlsToCache = [
     '/',
     '/index.html',

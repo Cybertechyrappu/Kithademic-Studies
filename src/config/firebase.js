@@ -3,15 +3,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase
 import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-// Load config from window.APP_CONFIG or fallback to a template
+// Load config from window.APP_CONFIG or fallback to the current project credentials
 const firebaseConfig = window.APP_CONFIG?.firebaseConfig || {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID",
-    measurementId: "YOUR_MEASUREMENT_ID"
+    apiKey: "AIzaSyDm97rTDsP1sELznlVKLogPBkMiy0fpc9c",
+    authDomain: "kithademic-studies.firebaseapp.com",
+    projectId: "kithademic-studies",
+    storageBucket: "kithademic-studies.firebasestorage.app",
+    messagingSenderId: "962734931999",
+    appId: "1:962734931999:web:3d335b466bafca1065552a",
+    measurementId: "G-NXT6ZVKHSH"
 };
 
 const app = initializeApp(firebaseConfig);

@@ -182,6 +182,9 @@ const initApp = async () => {
     window.handleEmailSignIn = handleEmailSignIn;
     window.toggleAuthMode = toggleAuthMode;
 
+    // Video Player
+    window.findAndPlayVideo = findAndPlayVideo;
+
     // Wrapper functions to handle form submissions
     window.handleEmailSignUpClick = () => {
         const name = document.getElementById('signUpName').value.trim();

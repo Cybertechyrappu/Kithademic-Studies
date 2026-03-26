@@ -1,9 +1,13 @@
 // Classroom & Individual Video Player Logic
 import { auth, adminPhone } from "../config/firebase.js";
 import { fetchUserAccess, saveWatchHistory } from "../services/data-service.js";
-import { courses, courseContent, basicVideos } from "../utils/constants.js";
 import { showCustomAlert, showCustomConfirm } from "./dialogs.js";
 import { openAuthModal, setupBackButton } from "./navigation.js";
+
+// Get courses and content from global window object (loaded from Firestore)
+const getCourses = () => window.coursesData || [];
+const getCourseContent = (courseId) => window.courseContentData[courseId] || [];
+const getBasicVideos = () => window.basicVideosData || [];
 
 let plyrInstance = null;
 
@@ -102,6 +106,7 @@ export const openCourse = async (courseId) => {
         return;
     }
 
+    const courses = getCourses();
     const course = courses.find(c => c.id === courseId);
 
     if (parseInt(course.price) > 0) {
@@ -127,7 +132,7 @@ export const openCourse = async (courseId) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setupBackButton();
 
-    const lessons = courseContent[courseId];
+    const lessons = getCourseContent(courseId);
     const pl = document.getElementById('playlistItems');
     pl.innerHTML = "";
 
@@ -148,6 +153,7 @@ export const openCourse = async (courseId) => {
  * @param {string} videoId - YouTube video ID to find and play
  */
 export function findAndPlayVideo(videoId) {
+    const courseContent = window.courseContentData;
     for (const [cid, ls] of Object.entries(courseContent)) {
         const item = ls.find(l => l.videoId === videoId);
         if (item) {
@@ -155,6 +161,7 @@ export function findAndPlayVideo(videoId) {
             return;
         }
     }
+    const basicVideos = getBasicVideos();
     const basic = basicVideos.find(v => v.id === videoId);
     if (basic) {
         playSingleVideo(basic.id, basic.title);
@@ -176,6 +183,7 @@ export const buyCourse = (courseId, isRenewal = false) => {
         showCustomAlert("Error", "Admin contact not set up yet. Please check back later.");
         return;
     }
+    const courses = getCourses();
     const course = courses.find(c => c.id === courseId);
 
     const reqType = isRenewal ? "🔄 *Renewal Request*" : "🎓 *New Enrollment*";

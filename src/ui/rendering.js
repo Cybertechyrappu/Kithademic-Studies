@@ -1,10 +1,13 @@
 // Rendering Logic for Courses, Videos, and History
 import { fetchUserAccess, loadWatchHistory } from "../services/data-service.js";
-import { courses, basicVideos } from "../utils/constants.js";
 import { openCourse, playSingleVideo } from "./player.js";
 import { buyCourse } from "./player.js";
 import { adminPhone } from "../config/firebase.js";
 import { debounce } from "../utils/rate-limiter.js";
+
+// Get courses and videos from global window object (loaded from Firestore)
+const getCourses = () => window.coursesData || [];
+const getBasicVideos = () => window.basicVideosData || [];
 
 // Store current filter state
 let currentSearchQuery = '';
@@ -59,6 +62,9 @@ export async function renderCourses(user, currentCourseTab) {
         }
     }
     courseList.innerHTML = "";
+
+    // Get courses from global data (loaded from Firestore)
+    const courses = getCourses();
 
     // Filter courses by tab and search query
     let filteredCourses = courses.filter(c => {
@@ -137,6 +143,9 @@ export function renderBasicVideos() {
     const list = document.getElementById('videoList');
     if (!list) return;
     list.innerHTML = "";
+
+    // Get basic videos from global data (loaded from Firestore)
+    const basicVideos = getBasicVideos();
 
     basicVideos.forEach(v => {
         const div = document.createElement('div');

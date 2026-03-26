@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migrate Data to Firestore</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #022c22 0%, #001a14 100%);
+            color: white;
+            padding: 40px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(238, 187, 93, 0.3);
+        }
+        h1 {
+            color: #eebb5d;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #eebb5d;
+            color: #022c22;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #d4a84d;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .log {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .log div {
+            margin: 5px 0;
+        }
+        .success {
+            color: #4ade80;
+        }
+        .error {
+            color: #f87171;
+        }
+        .info {
+            color: #60a5fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Migrate Course Data to Firestore</h1>
+        <p>This will migrate all courses, lessons, and basic videos from constants.js to Firestore database.</p>
+
+        <div style="background: rgba(255, 165, 0, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid orange; margin: 20px 0;">
+            <strong>⚠️ Warning:</strong> This operation will create new documents in Firestore. Run this only once to avoid duplicates.
+        </div>
+
+        <button id="migrateBtn" onclick="runMigration()">Start Migration</button>
+        <button id="clearBtn" onclick="clearFirestore()" style="background: #ff4444; margin-left: 10px;">Clear Firestore Data</button>
+
+        <div class="log" id="log"></div>
+    </div>
+
+    <script src="../../config.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Initialize Firebase
+        const app = initializeApp(window.APP_CONFIG.firebaseConfig);
+        const db = getFirestore(app);
+
+        // Static data from constants.js
+        const basicVideos = [
+            { id: "42d2zuCqRY4", title: "Ramzan Talk | Yaseen Sidheeq Nurani" },
+            { id: "pWBPJlPFqRY", title: "എത്രയാണ് അറിവ് സമ്പാദിക്കേണ്ടത്" },
+            { id: "qvZPXKDLfLc", title: "സൂഫിസം | Yaseen Sidheeq Nurani" },
+            { id: "Myr2DVUwaXk", title: "ഒരേയൊരു മനുഷ്യൻ | യാസീൻ സിദ്ദീഖ് നൂറാനി" },
+            { id: "HGuknpnuHXs", title: "മുസ്ലിം വ്യക്തി നിയമം : മാനദണ്ഡങ്ങളിലെ നീതിബോധം" },
+            { id: "RHoOG42BnnI", title: "അശ്‌റഖ ബൈത്ത്  |  Yaseen Sidheeq Nurani" }
+        ];
+
+        const courses = [
+            {
+                id: "c_01", title: "പ്രാക്റ്റിക്കൽ ഫിഖ്ഹ് കോഴ്സ് - Batch 4", price: "200", isPurchasable: false,
+                desc: "KITHADEMIC STUDIES നിങ്ങൾക്കായി ഒരുക്കുന്നു, പ്രായോഗിക ജീവിതത്തിൽ ഉപകാരപ്പെടും വിധം ഫിഖ്ഹിനെ ലളിതമായി പരിചയപ്പെടുത്തുന്ന ഒരു പ്രത്യേക കോഴ്സ്.",
+                features: ["ട്യൂട്ടർ: യാസീൻ സിദ്ദീഖ് നൂറാനി", "ക്ലാസ് രീതി: റെക്കോർഡ് ചെയ്ത വീഡിയോകൾ", "ക്ലാസ്സുകളുടെ എണ്ണം: ആഴ്ചയിൽ 4","സബ്സ്ക്രിപ്ഷൻ ഫീ: 1 മാസത്തേക്ക് ₹200"]
+            },
+            {
+                id: "c_02", title: "അഖീദ കോഴ്സ്", price: "0", isPurchasable: false,
+                desc: "വിശ്വാസ കാര്യങ്ങളെ കുറിച്ചുള്ള പഠനം.",
+                features: ["ട്യൂട്ടർ: യാസീൻ സിദ്ദീഖ് നൂറാനി", "ക്ലാസ് രീതി: റെക്കോർഡ് ചെയ്ത വീഡിയോകൾ", "Free Course"]
+            }
+        ];
+
+        const courseContent = {
+            "c_01": [
+                { title: "Introduction to Course", videoId: "pWBPJlPFqRY" },
+                { title: "Chapter 1: Basics", videoId: "KMT1J3Lg6h0" }
+            ],
+            "c_02": [
+                { title: "Part-1 Aqeeda Foundation Course", videoId: "Mj2_llpeq_Q" },
+                { title: "Part-2 Aqeeda Foundation Course", videoId: "-FAi2iOkQF4" }
+            ]
+        };
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = type;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        window.runMigration = async function() {
+            const btn = document.getElementById('migrateBtn');
+            btn.disabled = true;
+            btn.textContent = 'Migrating...';
+
+            try {
+                log('🚀 Starting migration...', 'info');
+
+                // Migrate courses
+                log('📚 Migrating courses...', 'info');
+                for (let i = 0; i < courses.length; i++) {
+                    const course = courses[i];
+                    await setDoc(doc(db, 'courses', course.id), {
+                        title: course.title,
+                        description: course.desc,
+                        price: parseInt(course.price),
+                        isPurchasable: course.isPurchasable,
+                        features: course.features,
+                        instructor: "യാസീൻ സിദ്ദീഖ് നൂറാനി",
+                        order: i + 1,
+                        isActive: true,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    });
+                    log(`✓ Created course: ${course.title}`, 'success');
+
+                    // Migrate lessons for this course
+                    const lessons = courseContent[course.id] || [];
+                    for (let j = 0; j < lessons.length; j++) {
+                        const lesson = lessons[j];
+                        await setDoc(doc(db, 'courses', course.id, 'lessons', `lesson_${j+1}`), {
+                            title: lesson.title,
+                            videoId: lesson.videoId,
+                            order: j + 1,
+                            isPublished: true,
+                            createdAt: new Date()
+                        });
+                        log(`  ✓ Added lesson ${j+1}: ${lesson.title}`, 'success');
+                    }
+                }
+
+                // Migrate basic videos
+                log('🎥 Migrating basic videos...', 'info');
+                for (let i = 0; i < basicVideos.length; i++) {
+                    const video = basicVideos[i];
+                    await setDoc(doc(db, 'basicVideos', video.id), {
+                        title: video.title,
+                        videoId: video.id,
+                        order: i + 1,
+                        isPublished: true,
+                        createdAt: new Date()
+                    });
+                    log(`✓ Created basic video: ${video.title}`, 'success');
+                }
+
+                log('🎉 Migration completed successfully!', 'success');
+                log('✓ All courses, lessons, and basic videos have been migrated to Firestore', 'success');
+
+            } catch (error) {
+                log(`❌ Error during migration: ${error.message}`, 'error');
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Start Migration';
+            }
+        };
+
+        window.clearFirestore = async function() {
+            if (!confirm('⚠️ Are you sure you want to DELETE all courses, lessons, and basic videos from Firestore? This cannot be undone!')) {
+                return;
+            }
+
+            const btn = document.getElementById('clearBtn');
+            btn.disabled = true;
+            btn.textContent = 'Clearing...';
+
+            try {
+                log('🗑️ Clearing Firestore data...', 'info');
+
+                // Delete all courses and their subcollections
+                const coursesSnapshot = await getDocs(collection(db, 'courses'));
+                for (const courseDoc of coursesSnapshot.docs) {
+                    // Delete lessons subcollection
+                    const lessonsSnapshot = await getDocs(collection(db, 'courses', courseDoc.id, 'lessons'));
+                    for (const lessonDoc of lessonsSnapshot.docs) {
+                        await deleteDoc(doc(db, 'courses', courseDoc.id, 'lessons', lessonDoc.id));
+                    }
+                    // Delete course
+                    await deleteDoc(doc(db, 'courses', courseDoc.id));
+                    log(`✓ Deleted course: ${courseDoc.id}`, 'success');
+                }
+
+                // Delete all basic videos
+                const videosSnapshot = await getDocs(collection(db, 'basicVideos'));
+                for (const videoDoc of videosSnapshot.docs) {
+                    await deleteDoc(doc(db, 'basicVideos', videoDoc.id));
+                    log(`✓ Deleted basic video: ${videoDoc.id}`, 'success');
+                }
+
+                log('✓ Firestore data cleared successfully!', 'success');
+            } catch (error) {
+                log(`❌ Error clearing data: ${error.message}`, 'error');
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Clear Firestore Data';
+            }
+        };
+    </script>
+</body>
+</html>

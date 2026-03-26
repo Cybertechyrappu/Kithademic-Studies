@@ -19,8 +19,14 @@ import {
 import { switchTab, handleGetStarted } from "./ui/navigation.js";
 import { findAndPlayVideo } from "./ui/player.js";
 import { showCustomAlert } from "./ui/dialogs.js";
+import { fetchCourses, fetchCourseLessons, fetchBasicVideos } from "./services/data-service.js";
 
 let currentCourseTab = 'premium';
+
+// Global data loaded from Firestore
+window.coursesData = [];
+window.courseContentData = {};
+window.basicVideosData = [];
 
 // ============================================
 // Global Error Handler
@@ -74,18 +80,58 @@ window.onunhandledrejection = function(event) {
 };
 
 /**
+ * Loads all course data from Firestore
+ * Populates global data structures used by the app
+ */
+const loadCourseData = async () => {
+    try {
+        // Show loading indicator
+        const coursesContainer = document.getElementById('coursesContainer');
+        const basicVideosContainer = document.getElementById('basicVideosGrid');
+
+        if (coursesContainer) coursesContainer.innerHTML = '<p style="text-align:center; color:#888;">Loading courses...</p>';
+        if (basicVideosContainer) basicVideosContainer.innerHTML = '<p style="text-align:center; color:#888;">Loading videos...</p>';
+
+        // Fetch courses from Firestore
+        window.coursesData = await fetchCourses();
+
+        // Fetch lessons for each course
+        for (const course of window.coursesData) {
+            window.courseContentData[course.id] = await fetchCourseLessons(course.id);
+        }
+
+        // Fetch basic videos
+        window.basicVideosData = await fetchBasicVideos();
+
+        console.log('✓ Course data loaded from Firestore:', {
+            courses: window.coursesData.length,
+            basicVideos: window.basicVideosData.length
+        });
+
+        return true;
+    } catch (error) {
+        console.error('Failed to load course data:', error);
+        showCustomAlert('Error', 'Failed to load courses. Please refresh the page.');
+        return false;
+    }
+};
+
+/**
  * Initializes the application
  * Sets up UI, navigation, authentication listeners, and PWA functionality
  */
-const initApp = () => {
-    // 1. Render Basic UI
-    renderBasicVideos();
-    
-    // 2. Setup Navigation
-    const activeBtn = document.querySelector('.nav-item.active'); 
-    if(activeBtn) setTimeout(() => switchTab(activeBtn, null, true), 100); 
+const initApp = async () => {
+    // 1. Load course data from Firestore
+    await loadCourseData();
 
-    // 3. Listen to Auth Changes
+    // 2. Render Basic UI
+    renderBasicVideos();
+
+    // 3. Setup Navigation
+    const activeBtn = document.querySelector('.nav-item.active');
+    if(activeBtn) setTimeout(() => switchTab(activeBtn, null, true), 100);
+
+    // 4. Listen to Auth Changes
     listenToAuthChanges(async (user) => {
         const navIconDiv = document.getElementById('navAuthIcon'); 
         const label = document.getElementById('authLabel');
@@ -117,7 +163,7 @@ const initApp = () => {
         renderCourses(user, currentCourseTab);
     });
 
-    // 4. Global Window Bindings for HTML onclicks (if still needed)
+    // 5. Global Window Bindings for HTML onclicks (if still needed)
     window.switchTab = switchTab;
     window.handleGoogleAuth = handleGoogleAuth;
     window.handleSignOut = handleSignOut;

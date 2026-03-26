@@ -149,3 +149,86 @@ export async function loadWatchHistory(userId, limitCount = 10) {
         return [];
     }
 }
+
+// ============================================
+// Course Management Functions (Firestore)
+// ============================================
+
+/**
+ * Fetches all active courses from Firestore
+ * @returns {Promise<Array>} Array of course objects
+ */
+export async function fetchCourses() {
+    try {
+        return await retryOperation(async () => {
+            const snapshot = await getDocs(
+                query(collection(db, 'courses'), orderBy('order', 'asc'))
+            );
+            const courses = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.isActive !== false) { // Include if isActive is true or undefined
+                    courses.push({ id: doc.id, ...data });
+                }
+            });
+            return courses;
+        });
+    } catch (error) {
+        console.error('Error fetching courses:', error);
+        return [];
+    }
+}
+
+/**
+ * Fetches all lessons for a specific course from Firestore
+ * @param {string} courseId - Course identifier
+ * @returns {Promise<Array>} Array of lesson objects
+ */
+export async function fetchCourseLessons(courseId) {
+    try {
+        return await retryOperation(async () => {
+            const snapshot = await getDocs(
+                query(
+                    collection(db, 'courses', courseId, 'lessons'),
+                    orderBy('order', 'asc')
+                )
+            );
+            const lessons = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.isPublished !== false) { // Include if isPublished is true or undefined
+                    lessons.push({ id: doc.id, ...data });
+                }
+            });
+            return lessons;
+        });
+    } catch (error) {
+        console.error('Error fetching course lessons:', error);
+        return [];
+    }
+}
+
+/**
+ * Fetches all published basic videos from Firestore
+ * @returns {Promise<Array>} Array of basic video objects
+ */
+export async function fetchBasicVideos() {
+    try {
+        return await retryOperation(async () => {
+            const snapshot = await getDocs(
+                query(collection(db, 'basicVideos'), orderBy('order', 'asc'))
+            );
+            const videos = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.isPublished !== false) { // Include if isPublished is true or undefined
+                    videos.push({ id: doc.id, ...data });
+                }
+            });
+            return videos;
+        });
+    } catch (error) {
+        console.error('Error fetching basic videos:', error);
+        return [];
+    }
+}

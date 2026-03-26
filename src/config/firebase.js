@@ -1,6 +1,12 @@
 // Firebase Services Initialization
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import {
+    getAuth,
+    GoogleAuthProvider,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    updateProfile
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 /**
@@ -31,5 +37,13 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
 
-export { app, auth, db, googleProvider };
+export {
+    app,
+    auth,
+    db,
+    googleProvider,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    updateProfile
+};
 export const adminPhone = window.APP_CONFIG?.adminPhone || "";

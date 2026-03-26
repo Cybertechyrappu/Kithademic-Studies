@@ -197,11 +197,52 @@
         <div class="modal-content">
             <span class="close" onclick="closeAuthModal()" style="float:right; cursor:pointer; font-size:1.5rem;">&times;</span>
 
+            <!-- LOGIN VIEW -->
             <div id="loginContent" style="text-align: center; padding-bottom: 10px;">
-                <h2 id="modalTitle" style="margin-bottom: 30px;">Get Access</h2>
-                <p style="color:#aaa; margin-bottom: 20px; font-size: 0.9rem;">Access your courses and track your progress.</p>
+                <h2 id="modalTitle" style="margin-bottom: 20px;">Welcome Back</h2>
+
+                <!-- Email/Password Sign In Form -->
+                <div id="signInForm">
+                    <div class="auth-input-group">
+                        <input type="email" id="signInEmail" class="auth-input" placeholder="Email Address" required>
+                    </div>
+                    <div class="auth-input-group">
+                        <input type="password" id="signInPassword" class="auth-input" placeholder="Password" required>
+                    </div>
+                    <button class="btn-gold" onclick="handleEmailSignInClick()" style="width: 100%; margin-bottom: 15px;">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </button>
+                </div>
+
+                <!-- Email/Password Sign Up Form -->
+                <div id="signUpForm" class="hidden">
+                    <div class="auth-input-group">
+                        <input type="text" id="signUpName" class="auth-input" placeholder="Display Name" required>
+                    </div>
+                    <div class="auth-input-group">
+                        <input type="email" id="signUpEmail" class="auth-input" placeholder="Email Address" required>
+                    </div>
+                    <div class="auth-input-group">
+                        <input type="password" id="signUpPassword" class="auth-input" placeholder="Password (min 6 characters)" required>
+                    </div>
+                    <button class="btn-gold" onclick="handleEmailSignUpClick()" style="width: 100%; margin-bottom: 15px;">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </button>
+                </div>
+
+                <!-- Mode Toggle -->
+                <p id="authModeToggle" onclick="toggleAuthMode()" style="color:#aaa; font-size: 0.85rem; cursor: pointer; margin-bottom: 20px;">
+                    Don't have an account? <span class="auth-link">Sign Up</span>
+                </p>
+
+                <!-- Divider -->
+                <div class="auth-divider">
+                    <span>or continue with</span>
+                </div>
+
+                <!-- Google Sign In -->
                 <button class="btn-google" onclick="handleGoogleAuth()">
-                    <i class="fab fa-google"></i> Continue with Google
+                    <i class="fab fa-google"></i> Google
                 </button>
             </div>
 
@@ -238,6 +279,41 @@
         </div>
     </div>
 
+    <script>
+        // Handle Enter key in auth forms
+        document.addEventListener('DOMContentLoaded', () => {
+            // Sign In form
+            const signInEmail = document.getElementById('signInEmail');
+            const signInPassword = document.getElementById('signInPassword');
+
+            [signInEmail, signInPassword].forEach(input => {
+                if (input) {
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleEmailSignInClick();
+                        }
+                    });
+                }
+            });
+
+            // Sign Up form
+            const signUpName = document.getElementById('signUpName');
+            const signUpEmail = document.getElementById('signUpEmail');
+            const signUpPassword = document.getElementById('signUpPassword');
+
+            [signUpName, signUpEmail, signUpPassword].forEach(input => {
+                if (input) {
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleEmailSignUpClick();
+                        }
+                    });
+                }
+            });
+        });
+    </script>
     <script src="config.js"></script>
     <script>
         // Check if config.js loaded successfully

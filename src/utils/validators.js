@@ -108,3 +108,16 @@ export const isValidPrice = (price) => {
     const numPrice = typeof price === 'string' ? parseInt(price, 10) : price;
     return !isNaN(numPrice) && numPrice >= 0;
 };
+
+/**
+ * Validates password strength
+ * @param {string} password - Password to validate
+ * @returns {boolean} True if valid password
+ */
+export const isValidPassword = (password) => {
+    if (!password || typeof password !== 'string') {
+        return false;
+    }
+    // Firebase requires minimum 6 characters
+    return password.length >= 6;
+};

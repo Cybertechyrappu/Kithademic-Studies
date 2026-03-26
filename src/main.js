@@ -6,7 +6,10 @@ import {
     handleSignOut,
     checkAndCreateProfile,
     closeAuthModal,
-    openAuthModal
+    openAuthModal,
+    handleEmailSignUp,
+    handleEmailSignIn,
+    toggleAuthMode
 } from "./auth/auth-manager.js";
 import {
     renderCourses,
@@ -126,6 +129,25 @@ const initApp = () => {
         document.querySelectorAll('.top-tab-btn').forEach(btn => btn.classList.remove('active'));
         btnElement.classList.add('active');
         renderCourses(auth.currentUser, currentCourseTab);
+    };
+
+    // Email/Password Auth
+    window.handleEmailSignUp = handleEmailSignUp;
+    window.handleEmailSignIn = handleEmailSignIn;
+    window.toggleAuthMode = toggleAuthMode;
+
+    // Wrapper functions to handle form submissions
+    window.handleEmailSignUpClick = () => {
+        const name = document.getElementById('signUpName').value.trim();
+        const email = document.getElementById('signUpEmail').value.trim();
+        const password = document.getElementById('signUpPassword').value;
+        handleEmailSignUp(email, password, name);
+    };
+
+    window.handleEmailSignInClick = () => {
+        const email = document.getElementById('signInEmail').value.trim();
+        const password = document.getElementById('signInPassword').value;
+        handleEmailSignIn(email, password);
     };
     
     // PWA

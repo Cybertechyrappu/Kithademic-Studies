@@ -74,10 +74,10 @@ h1, h2, h3, h4, h5, h6 {
     letter-spacing: -0.02em;
 }
 
-h1 { font-size: 2.5rem; }
-h2 { font-size: 2rem; }
-h3 { font-size: 1.5rem; }
-h4 { font-size: 1.25rem; }
+h1 { font-size: 1.75rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.125rem; }
+h4 { font-size: 1rem; }
 
 p {
     line-height: 1.7;
@@ -90,8 +90,8 @@ p {
 
 .page {
     min-height: 100vh;
-    padding-top: 80px;
-    padding-bottom: 120px;
+    padding-top: 64px;
+    padding-bottom: 100px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -104,8 +104,8 @@ p {
 
 .container {
     width: 100%;
-    max-width: 1400px;
-    padding: 0 20px;
+    max-width: 1200px;
+    padding: 0 16px;
     margin: 0 auto;
 }
 
@@ -118,7 +118,7 @@ p {
     top: 0;
     left: 0;
     width: 100%;
-    padding: 16px 24px;
+    padding: 12px 16px;
     background: rgba(0, 0, 0, 0.95);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -130,7 +130,7 @@ p {
 }
 
 .logo {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: -0.03em;
@@ -168,23 +168,23 @@ p {
 
 .bottom-nav {
     position: fixed;
-    bottom: 20px;
+    bottom: 12px;
     left: 50%;
     transform: translateX(-50%);
-    width: 90%;
-    max-width: 480px;
-    height: 64px;
+    width: 92%;
+    max-width: 420px;
+    height: 56px;
     background: rgba(18, 18, 18, 0.98);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border-medium);
     box-shadow: var(--shadow-lg);
-    border-radius: 20px;
+    border-radius: 16px;
     display: flex;
     justify-content: space-around;
     align-items: center;
     z-index: 1000;
-    padding: 8px;
+    padding: 6px;
 }
 
 .nav-item {
@@ -204,12 +204,12 @@ p {
 }
 
 .nav-item i {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     transition: var(--transition-base);
 }
 
 .nav-item .label {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 500;
     transition: var(--transition-base);
 }
@@ -256,31 +256,31 @@ p {
    ============================================ */
 
 .hero-content {
-    margin-top: 80px;
+    margin-top: 40px;
     text-align: center;
-    padding: 60px 20px;
-    max-width: 800px;
+    padding: 32px 16px;
+    max-width: 680px;
 }
 
 .hero-content h1 {
-    font-size: 3rem;
-    margin-bottom: 16px;
+    font-size: 2rem;
+    margin-bottom: 12px;
     font-weight: 700;
     letter-spacing: -0.04em;
 }
 
 .hero-content h2 {
-    font-size: 2rem;
-    margin-bottom: 24px;
+    font-size: 1.5rem;
+    margin-bottom: 16px;
     color: var(--text-secondary);
     font-weight: 500;
 }
 
 .hero-content p {
-    font-size: 1.125rem;
+    font-size: 1rem;
     color: var(--text-tertiary);
-    margin-bottom: 32px;
-    line-height: 1.8;
+    margin-bottom: 24px;
+    line-height: 1.6;
 }
 
 .gold-text {
@@ -294,10 +294,10 @@ p {
 .btn-primary {
     background: var(--accent-primary);
     color: var(--bg-primary);
-    padding: 14px 32px;
+    padding: 12px 24px;
     border: none;
-    border-radius: 12px;
-    font-size: 1rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition-base);
@@ -320,17 +320,17 @@ p {
 .btn-gold {
     background: var(--accent-primary);
     color: var(--bg-primary);
-    padding: 12px 24px;
+    padding: 10px 20px;
     border: none;
-    border-radius: 10px;
-    font-size: 0.95rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition-base);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
 }
 
 .btn-gold:hover {
@@ -346,9 +346,9 @@ p {
     background: transparent;
     border: 1px solid var(--border-strong);
     color: var(--text-primary);
-    padding: 10px 24px;
-    border-radius: 10px;
-    font-size: 0.9rem;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition-base);
@@ -363,9 +363,9 @@ p {
     background: transparent;
     border: 1px solid var(--border-medium);
     color: var(--text-secondary);
-    padding: 10px 24px;
-    border-radius: 10px;
-    font-size: 0.9rem;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 0.85rem;
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition-base);
@@ -383,14 +383,14 @@ p {
 .top-tab-nav {
     display: flex;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     background: var(--bg-elevated);
     border: 1px solid var(--border-medium);
-    border-radius: 12px;
-    padding: 6px;
+    border-radius: 10px;
+    padding: 4px;
     width: fit-content;
-    max-width: 300px;
-    margin: 0 auto 32px auto;
+    max-width: 260px;
+    margin: 0 auto 24px auto;
 }
 
 .top-tab-btn {
@@ -398,9 +398,9 @@ p {
     background: transparent;
     border: none;
     color: var(--text-tertiary);
-    padding: 10px 24px;
-    border-radius: 8px;
-    font-size: 0.875rem;
+    padding: 8px 20px;
+    border-radius: 7px;
+    font-size: 0.8125rem;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition-fast);
@@ -422,9 +422,9 @@ p {
 
 .search-container {
     width: 100%;
-    max-width: 600px;
-    margin: 0 auto 32px auto;
-    padding: 0 20px;
+    max-width: 540px;
+    margin: 0 auto 24px auto;
+    padding: 0 16px;
 }
 
 .search-box {
@@ -432,8 +432,8 @@ p {
     align-items: center;
     background: var(--bg-elevated);
     border: 1px solid var(--border-medium);
-    border-radius: 12px;
-    padding: 12px 16px;
+    border-radius: 10px;
+    padding: 10px 14px;
     transition: var(--transition-fast);
 }
 
@@ -444,8 +444,8 @@ p {
 
 .search-icon {
     color: var(--text-tertiary);
-    margin-right: 12px;
-    font-size: 1rem;
+    margin-right: 10px;
+    font-size: 0.9375rem;
 }
 
 .search-input {
@@ -454,7 +454,7 @@ p {
     border: none;
     outline: none;
     color: var(--text-primary);
-    font-size: 0.95rem;
+    font-size: 0.875rem;
     font-family: inherit;
 }
 
@@ -492,82 +492,82 @@ p {
 
 .course-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
     width: 100%;
-    max-width: 1400px;
-    padding: 0 20px;
+    max-width: 1200px;
+    padding: 0 16px;
     margin: 0 auto;
 }
 
 .course-card {
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
-    border-radius: 16px;
+    border-radius: 12px;
     overflow: hidden;
     transition: var(--transition-base);
     cursor: pointer;
 }
 
 .course-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
     border-color: var(--border-medium);
     box-shadow: var(--shadow-lg);
 }
 
 .card-header {
     background: var(--bg-secondary);
-    padding: 24px;
+    padding: 16px;
     border-bottom: 1px solid var(--border-subtle);
 }
 
 .course-card h3 {
     color: var(--text-primary);
-    font-size: 1.25rem;
-    margin-bottom: 8px;
+    font-size: 1.0625rem;
+    margin-bottom: 6px;
     font-weight: 600;
 }
 
 .badge {
     display: inline-block;
-    font-size: 0.7rem;
+    font-size: 0.625rem;
     background: var(--accent-primary);
     color: var(--bg-primary);
-    padding: 4px 12px;
-    border-radius: 6px;
+    padding: 3px 10px;
+    border-radius: 5px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
 .desc {
-    padding: 24px;
-    font-size: 0.95rem;
+    padding: 16px;
+    font-size: 0.875rem;
     color: var(--text-secondary);
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 .features {
     list-style: none;
-    padding: 0 24px 24px 24px;
+    padding: 0 16px 16px 16px;
 }
 
 .features li {
-    font-size: 0.9rem;
-    margin-bottom: 12px;
+    font-size: 0.8125rem;
+    margin-bottom: 10px;
     color: var(--text-secondary);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .features i {
     color: var(--text-primary);
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
 }
 
 .card-footer {
-    padding: 20px 24px;
+    padding: 14px 16px;
     background: var(--bg-secondary);
     display: flex;
     justify-content: space-between;
@@ -576,7 +576,7 @@ p {
 }
 
 .price {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -587,25 +587,25 @@ p {
 
 .video-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
     width: 100%;
-    max-width: 1400px;
-    padding: 0 20px;
+    max-width: 1200px;
+    padding: 0 16px;
     margin: 0 auto;
 }
 
 .video-card {
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
-    border-radius: 16px;
+    border-radius: 12px;
     overflow: hidden;
     cursor: pointer;
     transition: var(--transition-base);
 }
 
 .video-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
     border-color: var(--border-medium);
     box-shadow: var(--shadow-lg);
 }
@@ -636,7 +636,7 @@ p {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 3rem;
+    font-size: 2.5rem;
     color: rgba(255, 255, 255, 0.9);
     transition: var(--transition-base);
     text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
@@ -648,11 +648,11 @@ p {
 }
 
 .video-info {
-    padding: 16px;
+    padding: 12px;
 }
 
 .video-info h3 {
-    font-size: 1rem;
+    font-size: 0.9375rem;
     color: var(--text-primary);
     margin: 0;
     font-weight: 500;
@@ -680,10 +680,10 @@ p {
 .classroom-container {
     display: grid;
     grid-template-columns: 1.5fr 1fr;
-    gap: 24px;
-    width: 95%;
-    max-width: 1500px;
-    margin: 0 auto 20px auto;
+    gap: 16px;
+    width: 96%;
+    max-width: 1300px;
+    margin: 0 auto 16px auto;
 }
 
 .video-wrapper {
@@ -691,7 +691,7 @@ p {
     width: 100%;
     aspect-ratio: 16 / 9;
     background: var(--bg-primary);
-    border-radius: 16px;
+    border-radius: 12px;
     overflow: hidden;
     border: 1px solid var(--border-subtle);
 }
@@ -703,24 +703,24 @@ p {
 }
 
 .video-area h2 {
-    margin-top: 20px;
+    margin-top: 16px;
     color: var(--text-primary);
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 600;
 }
 
 .playlist-area {
     background: var(--bg-elevated);
     border: 1px solid var(--border-subtle);
-    border-radius: 16px;
+    border-radius: 12px;
     display: flex;
     flex-direction: column;
-    height: 600px;
+    height: 520px;
     overflow: hidden;
 }
 
 .playlist-header {
-    padding: 20px;
+    padding: 14px 16px;
     background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-subtle);
     display: flex;
@@ -729,7 +729,7 @@ p {
 }
 
 .playlist-header h3 {
-    font-size: 1.125rem;
+    font-size: 1rem;
     font-weight: 600;
 }
 
@@ -739,13 +739,13 @@ p {
 }
 
 .lesson-item {
-    padding: 16px 20px;
+    padding: 12px 16px;
     border-bottom: 1px solid var(--border-subtle);
     cursor: pointer;
     transition: var(--transition-fast);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .lesson-item:hover {
@@ -759,7 +759,7 @@ p {
 
 .lesson-item i {
     color: var(--text-tertiary);
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
 }
 
 .lesson-item.active i {
@@ -768,7 +768,7 @@ p {
 
 .lesson-item span {
     color: var(--text-secondary);
-    font-size: 0.9rem;
+    font-size: 0.8125rem;
 }
 
 .lesson-item.active span {
@@ -798,21 +798,21 @@ p {
 .modal-content {
     background: var(--bg-elevated);
     border: 1px solid var(--border-medium);
-    padding: 32px;
-    border-radius: 20px;
-    width: 90%;
-    max-width: 440px;
+    padding: 24px;
+    border-radius: 16px;
+    width: 92%;
+    max-width: 400px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
     box-shadow: var(--shadow-xl);
 }
 
 .modal-content h2 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 600;
     text-align: center;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 /* ============================================
@@ -820,17 +820,17 @@ p {
    ============================================ */
 
 .auth-input-group {
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
 
 .auth-input {
     width: 100%;
-    padding: 14px 16px;
+    padding: 12px 14px;
     background: var(--bg-secondary);
     border: 1px solid var(--border-medium);
-    border-radius: 10px;
+    border-radius: 8px;
     color: var(--text-primary);
-    font-size: 1rem;
+    font-size: 0.9375rem;
     outline: none;
     transition: var(--transition-fast);
     font-family: inherit;
@@ -853,7 +853,7 @@ p {
     display: flex;
     align-items: center;
     text-align: center;
-    margin: 20px 0;
+    margin: 16px 0;
 }
 
 .auth-divider::before,
@@ -864,9 +864,9 @@ p {
 }
 
 .auth-divider span {
-    padding: 0 16px;
+    padding: 0 14px;
     color: var(--text-tertiary);
-    font-size: 0.85rem;
+    font-size: 0.8125rem;
 }
 
 .auth-link {
@@ -885,11 +885,11 @@ p {
    ============================================ */
 
 .big-profile-img {
-    width: 80px;
-    height: 80px;
+    width: 68px;
+    height: 68px;
     border-radius: 50%;
     border: 2px solid var(--border-strong);
-    margin: 0 auto 16px auto;
+    margin: 0 auto 12px auto;
     object-fit: cover;
     background: var(--bg-secondary);
     display: block;
@@ -897,14 +897,15 @@ p {
 
 #profileContent h2 {
     text-align: center;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    font-size: 1.125rem;
 }
 
 #profileContent p {
     text-align: center;
     color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-bottom: 24px;
+    font-size: 0.8125rem;
+    margin-bottom: 20px;
 }
 
 /* ============================================
@@ -961,21 +962,34 @@ p {
 }
 
 @media (max-width: 768px) {
+    .hero-content {
+        padding: 24px 12px;
+        margin-top: 20px;
+    }
+
     .hero-content h1 {
-        font-size: 2.25rem;
+        font-size: 1.625rem;
     }
 
     .hero-content h2 {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
     }
 
     .course-grid,
     .video-grid {
         grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 0 12px;
     }
 
     .bottom-nav {
         max-width: 95%;
+        height: 52px;
+    }
+
+    .page {
+        padding-top: 56px;
+        padding-bottom: 80px;
     }
 
     input, textarea, select {

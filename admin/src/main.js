@@ -1,5 +1,9 @@
 import { loginAdmin, logoutAdmin, handleAuthStateChanges } from "./auth/admin-auth.js";
 import { getStudents, getStudentHistory, approveCourse } from "./services/student-service.js";
+import { renderCourseManagement } from "./ui/course-manager.js";
+
+// Make renderCourseManagement available globally for onclick
+window.renderCourseManagement = renderCourseManagement;
 
 // DOM Elements
 const loginView = document.getElementById('loginView');

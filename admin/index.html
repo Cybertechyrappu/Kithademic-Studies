@@ -55,9 +55,10 @@
                 <button id="logoutBtn" style="background:transparent; border:1px solid #ff4444; color:#ff4444; padding:4px 10px; border-radius:5px; cursor:pointer; font-size:0.8rem;">Logout</button>
             </div>
 
-            <div class="dashboard-tabs" style="display:flex; gap:10px; margin-bottom: 20px;">
+            <div class="dashboard-tabs" style="display:flex; gap:10px; margin-bottom: 20px; flex-wrap: wrap;">
                 <button class="tab-btn active" onclick="switchAdminTab('usersListSection', this)">All Users</button>
                 <button class="tab-btn" onclick="switchAdminTab('waProcessorSection', this)"><i class="fab fa-whatsapp"></i> Smart Approve</button>
+                <button class="tab-btn" onclick="switchAdminTab('coursesManagementSection', this); window.renderCourseManagement()"><i class="fas fa-graduation-cap"></i> Courses</button>
             </div>
 
             <div id="usersListSection">
@@ -75,11 +76,15 @@
                 <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; border: 1px solid var(--gold-border); text-align: left;">
                     <h4 style="color:var(--accent-gold); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">Process Request</h4>
                     <p style="font-size: 0.8rem; color: #ccc; margin-bottom: 15px; line-height: 1.4;">Paste the exact enrollment message received from the student below. The system will auto-extract their UID and Course ID.</p>
-                    
+
                     <textarea id="waInput" class="admin-input" rows="7" placeholder="Paste message here..."></textarea>
-                    
+
                     <button onclick="processWaMessage()" class="btn-gold" style="width: 100%; margin-top: 15px; padding: 12px;"><i class="fas fa-magic"></i> Extract & Verify</button>
                 </div>
+            </div>
+
+            <div id="coursesManagementSection" class="hidden">
+                <!-- Course management UI will be rendered here by course-manager.js -->
             </div>
         </div>
     </div>

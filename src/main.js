@@ -2,7 +2,6 @@
 import { auth } from "./config/firebase.js";
 import {
     listenToAuthChanges,
-    handleGoogleAuth,
     handleSignOut,
     checkAndCreateProfile,
     closeAuthModal,
@@ -165,7 +164,6 @@ const initApp = async () => {
 
     // 5. Global Window Bindings for HTML onclicks (if still needed)
     window.switchTab = switchTab;
-    window.handleGoogleAuth = handleGoogleAuth;
     window.handleSignOut = handleSignOut;
     window.handleGetStarted = () => handleGetStarted(auth);
     window.closeAuthModal = closeAuthModal;

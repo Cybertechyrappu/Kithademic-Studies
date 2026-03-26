@@ -1,6 +1,6 @@
 // Authentication Manager
-import { auth, googleProvider, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "../config/firebase.js";
-import { signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { auth, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "../config/firebase.js";
+import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { showCustomAlert, showCustomConfirm } from "../ui/dialogs.js";
 import { isValidEmail, isValidPassword, sanitizeInput } from "../utils/validators.js";
@@ -14,20 +14,6 @@ export const openAuthModal = () => document.getElementById('authModal').classLis
  * Closes the authentication modal
  */
 export const closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
-
-/**
- * Handles Google Sign-In authentication
- * Shows error alert if authentication fails
- * @returns {Promise<void>}
- */
-export const handleGoogleAuth = async () => {
-    try {
-        await signInWithPopup(auth, googleProvider);
-        closeAuthModal();
-    } catch (error) {
-        showCustomAlert("Login Error", error.message);
-    }
-};
 
 /**
  * Handles user sign out with confirmation dialog

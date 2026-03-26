@@ -2,7 +2,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
     getAuth,
-    GoogleAuthProvider,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     updateProfile
@@ -35,13 +34,11 @@ if (!isValidFirebaseConfig(firebaseConfig)) {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const googleProvider = new GoogleAuthProvider();
 
 export {
     app,
     auth,
     db,
-    googleProvider,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     updateProfile

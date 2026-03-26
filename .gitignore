@@ -1,8 +1,10 @@
 # Secrets & Config
 config.js
 admin/config.js
+env-config.js
 !config.example.js
 !admin/config.example.js
+!env-config.template.js
 
 # Node / Modules
 node_modules/

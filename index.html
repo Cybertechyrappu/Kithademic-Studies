@@ -314,11 +314,26 @@
             });
         });
     </script>
-    <script src="config.js"></script>
     <script>
-        // Check if config.js loaded successfully
-        if (!window.APP_CONFIG || !window.APP_CONFIG.firebaseConfig) {
-            document.body.innerHTML = `
+        // Try to load env-config.js first (generated from environment variables)
+        // then fall back to config.js (local development)
+        (function() {
+            const script = document.createElement('script');
+            script.src = 'env-config.js';
+            script.onerror = function() {
+                // Fallback to config.js if env-config.js doesn't exist
+                const fallback = document.createElement('script');
+                fallback.src = 'config.js';
+                document.head.appendChild(fallback);
+            };
+            document.head.appendChild(script);
+        })();
+    </script>
+    <script>
+        // Check if configuration loaded successfully (with a delay to let scripts load)
+        setTimeout(function() {
+            if (!window.APP_CONFIG || !window.APP_CONFIG.firebaseConfig) {
+                document.body.innerHTML = `
                 <div style="
                     position: fixed;
                     top: 0;
@@ -357,8 +372,8 @@
                             margin-bottom: 24px;
                             opacity: 0.9;
                         ">
-                            The application configuration file (config.js) is missing or incomplete.
-                            Please create a config.js file in the root directory with your Firebase credentials.
+                            The application configuration is missing or incomplete.
+                            Please set up your Firebase credentials.
                         </p>
                         <p style="
                             font-size: 14px;
@@ -369,16 +384,19 @@
                             border-radius: 12px;
                             text-align: left;
                         ">
-                            <strong style="color: #eebb5d;">Instructions:</strong><br>
-                            1. Create a file named <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">config.js</code> in the root directory<br>
+                            <strong style="color: #eebb5d;">For Local Development:</strong><br>
+                            1. Create <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">config.js</code> in the root directory<br>
                             2. Use <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">config.example.js</code> as a template<br>
-                            3. Add your Firebase project credentials<br>
-                            4. Reload the page
+                            3. Add your Firebase credentials<br><br>
+                            <strong style="color: #eebb5d;">For Vercel/Production:</strong><br>
+                            Add environment variables in Vercel dashboard:<br>
+                            VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, etc.
                         </p>
                     </div>
                 </div>
             `;
-        }
+            }
+        }, 500);
     </script>
     <script type="module" src="src/main.js"></script>
 </body>

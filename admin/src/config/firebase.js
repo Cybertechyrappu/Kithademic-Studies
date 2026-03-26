@@ -2,14 +2,28 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-const firebaseConfig = window.ADMIN_CONFIG?.firebaseConfig || {
-    apiKey: "AIzaSyDm97rTDsP1sELznlVKLogPBkMiy0fpc9c",
-    authDomain: "kithademic-studies.firebaseapp.com",
-    projectId: "kithademic-studies",
-    storageBucket: "kithademic-studies.firebasestorage.app",
-    messagingSenderId: "962734931999",
-    appId: "1:962734931999:web:3d335b466bafca1065552a"
+/**
+ * Validates Firebase configuration object
+ * @param {Object} config - Firebase configuration object
+ * @returns {boolean} True if valid configuration
+ */
+const isValidFirebaseConfig = (config) => {
+    return config &&
+           config.apiKey &&
+           config.authDomain &&
+           config.projectId;
 };
+
+// Load config from window.ADMIN_CONFIG (required - no fallback)
+const firebaseConfig = window.ADMIN_CONFIG?.firebaseConfig;
+
+// Validate configuration exists
+if (!isValidFirebaseConfig(firebaseConfig)) {
+    throw new Error(
+        'Admin Firebase configuration missing. Please create admin/config.js with your Firebase credentials. ' +
+        'See config.example.js for the required format.'
+    );
+}
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);

@@ -3,6 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.plyr.io https://www.gstatic.com https://www.youtube.com https://s.ytimg.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.plyr.io https://cdnjs.cloudflare.com;
+        img-src 'self' data: https: http:;
+        font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+        connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net https://firestore.googleapis.com;
+        frame-src https://www.youtube.com https://www.youtube-nocookie.com;
+        media-src https://www.youtube.com https://*.googlevideo.com;
+        worker-src 'self' blob:;
+        manifest-src 'self';
+    ">
     <title>Kithademic Studies</title>
     <link rel="manifest" href="manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -121,6 +133,16 @@
                 <button class="top-tab-btn" onclick="setCourseTab('free', this)">Free</button>
             </div>
 
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="courseSearch" placeholder="Search courses by title or description..." class="search-input">
+                    <button id="clearSearch" class="clear-search-btn hidden" title="Clear search">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
             <div class="course-grid" id="courseList"></div>
         </section>
 
@@ -217,6 +239,71 @@
     </div>
 
     <script src="config.js"></script>
+    <script>
+        // Check if config.js loaded successfully
+        if (!window.APP_CONFIG || !window.APP_CONFIG.firebaseConfig) {
+            document.body.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(135deg, #022c22 0%, #001a14 100%);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 20px;
+                    font-family: 'Inter', sans-serif;
+                    color: #ffffff;
+                    z-index: 10000;
+                ">
+                    <div style="
+                        background: rgba(255, 255, 255, 0.05);
+                        backdrop-filter: blur(16px);
+                        -webkit-backdrop-filter: blur(16px);
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        border-radius: 20px;
+                        padding: 40px;
+                        max-width: 500px;
+                        text-align: center;
+                        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+                    ">
+                        <div style="font-size: 64px; margin-bottom: 20px;">⚠️</div>
+                        <h1 style="
+                            font-size: 24px;
+                            margin-bottom: 16px;
+                            color: #eebb5d;
+                        ">Configuration Missing</h1>
+                        <p style="
+                            font-size: 16px;
+                            line-height: 1.6;
+                            margin-bottom: 24px;
+                            opacity: 0.9;
+                        ">
+                            The application configuration file (config.js) is missing or incomplete.
+                            Please create a config.js file in the root directory with your Firebase credentials.
+                        </p>
+                        <p style="
+                            font-size: 14px;
+                            line-height: 1.6;
+                            opacity: 0.7;
+                            background: rgba(0, 0, 0, 0.3);
+                            padding: 16px;
+                            border-radius: 12px;
+                            text-align: left;
+                        ">
+                            <strong style="color: #eebb5d;">Instructions:</strong><br>
+                            1. Create a file named <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">config.js</code> in the root directory<br>
+                            2. Use <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;">config.example.js</code> as a template<br>
+                            3. Add your Firebase project credentials<br>
+                            4. Reload the page
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
     <script type="module" src="src/main.js"></script>
 </body>
 </html>

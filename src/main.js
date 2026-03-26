@@ -1,24 +1,79 @@
 // Main Entry Point
 import { auth } from "./config/firebase.js";
-import { 
-    listenToAuthChanges, 
-    handleGoogleAuth, 
-    handleSignOut, 
+import {
+    listenToAuthChanges,
+    handleGoogleAuth,
+    handleSignOut,
     checkAndCreateProfile,
     closeAuthModal,
     openAuthModal
 } from "./auth/auth-manager.js";
-import { 
-    renderCourses, 
-    renderBasicVideos, 
-    renderHistory 
+import {
+    renderCourses,
+    renderBasicVideos,
+    renderHistory
 } from "./ui/rendering.js";
 import { switchTab, handleGetStarted } from "./ui/navigation.js";
 import { findAndPlayVideo } from "./ui/player.js";
+import { showCustomAlert } from "./ui/dialogs.js";
 
 let currentCourseTab = 'premium';
 
-// Global Event Listeners & State Manager
+// ============================================
+// Global Error Handler
+// ============================================
+
+/**
+ * Global error handler for uncaught exceptions
+ * Logs error details and shows user-friendly message
+ */
+window.onerror = function(message, source, lineno, colno, error) {
+    console.error('Global error caught:', {
+        message,
+        source,
+        lineno,
+        colno,
+        error
+    });
+
+    // Show user-friendly error message
+    if (showCustomAlert) {
+        showCustomAlert(
+            'Something Went Wrong',
+            'An unexpected error occurred. Please refresh the page and try again.'
+        );
+    }
+
+    // Return false to allow default error handling
+    return false;
+};
+
+/**
+ * Global handler for unhandled promise rejections
+ * Logs rejection details and shows user-friendly message
+ */
+window.onunhandledrejection = function(event) {
+    console.error('Unhandled promise rejection:', {
+        reason: event.reason,
+        promise: event.promise
+    });
+
+    // Show user-friendly error message
+    if (showCustomAlert) {
+        showCustomAlert(
+            'Operation Failed',
+            'An error occurred while processing your request. Please try again.'
+        );
+    }
+
+    // Prevent default handling
+    event.preventDefault();
+};
+
+/**
+ * Initializes the application
+ * Sets up UI, navigation, authentication listeners, and PWA functionality
+ */
 const initApp = () => {
     // 1. Render Basic UI
     renderBasicVideos();

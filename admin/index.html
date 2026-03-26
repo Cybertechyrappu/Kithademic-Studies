@@ -146,8 +146,16 @@
         </div>
     </div>
 
-    <script src="config.js"></script>
+    <script src="../config.js"></script>
     <script>
+        // Map main config to admin config if not already set
+        if (window.APP_CONFIG && !window.ADMIN_CONFIG) {
+            window.ADMIN_CONFIG = {
+                firebaseConfig: window.APP_CONFIG.firebaseConfig,
+                adminEmail: "admin@kithademic.com" // Change this to your admin email
+            };
+        }
+
         // Check if config.js loaded successfully
         if (!window.ADMIN_CONFIG || !window.ADMIN_CONFIG.firebaseConfig) {
             document.body.innerHTML = `

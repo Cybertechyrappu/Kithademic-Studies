@@ -1,7 +1,7 @@
 // Authentication Manager
 import { auth, googleProvider, db, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "../config/firebase.js";
-import { signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { showCustomAlert, showCustomConfirm } from "../ui/dialogs.js";
 import { isValidEmail, isValidPassword, sanitizeInput } from "../utils/validators.js";
 

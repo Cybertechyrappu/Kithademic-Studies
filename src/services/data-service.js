@@ -1,6 +1,6 @@
 // Firestore Data Service
 import { db } from "../config/firebase.js";
-import { getDoc, doc, setDoc, getDocs, collection, query, limit, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { getDoc, doc, setDoc, getDocs, collection, query, limit, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { isValidUserId, isValidVideoId } from "../utils/validators.js";
 import { rateLimiter, createRequestCache } from "../utils/rate-limiter.js";
 

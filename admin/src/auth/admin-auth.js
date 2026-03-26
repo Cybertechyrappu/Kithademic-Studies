@@ -1,5 +1,5 @@
 import { auth, ADMIN_EMAIL } from "../config/firebase.js";
-import { signInWithEmailAndPassword, signOut as fbSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import { signInWithEmailAndPassword, signOut as fbSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 export const handleAuthStateChanges = (onIn, onOut) => {
     onAuthStateChanged(auth, (user) => {

@@ -133,7 +133,7 @@ export const handleGoogleSignIn = async () => {
     } catch (error) {
         console.error("Google sign-in error:", error);
         if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
-            showCustomAlert("Google Sign-In Failed", "Could not sign in with Google. Please try again.");
+            showCustomAlert("Google Sign-In Failed", `Could not sign in with Google. Error: ${error.code} - ${error.message}`);
         }
     } finally {
         if (btn) {

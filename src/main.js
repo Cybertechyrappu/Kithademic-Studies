@@ -8,6 +8,7 @@ import {
     openAuthModal,
     handleEmailSignUp,
     handleEmailSignIn,
+    handleGoogleSignIn,
     toggleAuthMode
 } from "./auth/auth-manager.js";
 import {
@@ -19,6 +20,12 @@ import { switchTab, handleGetStarted } from "./ui/navigation.js";
 import { findAndPlayVideo } from "./ui/player.js";
 import { showCustomAlert } from "./ui/dialogs.js";
 import { fetchCourses, fetchCourseLessons, fetchBasicVideos } from "./services/data-service.js";
+import {
+    initSplash,
+    hideSplash,
+    animateNavIn,
+    animateTopBrandIn
+} from "./animations.js";
 
 let currentCourseTab = 'premium';
 
@@ -27,79 +34,28 @@ window.coursesData = [];
 window.courseContentData = {};
 window.basicVideosData = [];
 
-// ============================================
-// Global Error Handler
-// ============================================
+// ─── Global Error Handlers ───────────────────────────────────────────────────
 
-/**
- * Global error handler for uncaught exceptions
- * Logs error details and shows user-friendly message
- */
 window.onerror = function(message, source, lineno, colno, error) {
-    console.error('Global error caught:', {
-        message,
-        source,
-        lineno,
-        colno,
-        error
-    });
-
-    // Show user-friendly error message
-    if (showCustomAlert) {
-        showCustomAlert(
-            'Something Went Wrong',
-            'An unexpected error occurred. Please refresh the page and try again.'
-        );
-    }
-
-    // Return false to allow default error handling
+    console.error('Global error:', { message, source, lineno, colno, error });
     return false;
 };
 
-/**
- * Global handler for unhandled promise rejections
- * Logs rejection details and shows user-friendly message
- */
 window.onunhandledrejection = function(event) {
-    console.error('Unhandled promise rejection:', {
-        reason: event.reason,
-        promise: event.promise
-    });
-
-    // Show user-friendly error message
-    if (showCustomAlert) {
-        showCustomAlert(
-            'Operation Failed',
-            'An error occurred while processing your request. Please try again.'
-        );
-    }
-
-    // Prevent default handling
+    console.error('Unhandled rejection:', event.reason);
     event.preventDefault();
 };
 
-/**
- * Loads all course data from Firestore
- * Populates global data structures used by the app
- */
+// ─── Data Loading ────────────────────────────────────────────────────────────
+
 const loadCourseData = async () => {
     try {
-        // Show loading indicator
-        const coursesContainer = document.getElementById('coursesContainer');
-        const basicVideosContainer = document.getElementById('basicVideosGrid');
-
-        if (coursesContainer) coursesContainer.innerHTML = '<p style="text-align:center; color:#888;">Loading courses...</p>';
-        if (basicVideosContainer) basicVideosContainer.innerHTML = '<p style="text-align:center; color:#888;">Loading videos...</p>';
-
-        // Fetch courses from Firestore
         window.coursesData = await fetchCourses();
 
-        // Fetch lessons for each course
         for (const course of window.coursesData) {
             window.courseContentData[course.id] = await fetchCourseLessons(course.id);
         }
 
-        // Fetch basic videos
         window.basicVideosData = await fetchBasicVideos();
 
         console.log('✓ Course data loaded from Firestore:', {
@@ -115,33 +71,38 @@ const loadCourseData = async () => {
     }
 };
 
-/**
- * Initializes the application
- * Sets up UI, navigation, authentication listeners, and PWA functionality
- */
+// ─── App Init ────────────────────────────────────────────────────────────────
+
 const initApp = async () => {
-    // 1. Load course data from Firestore
+    // Start splash animation clock
+    initSplash();
+
+    // Start UI element entrance animations
+    animateTopBrandIn();
+    animateNavIn();
+
+    // Load data from Firestore
     await loadCourseData();
 
-    // 2. Render Basic UI
+    // Render videos (now we have data)
     renderBasicVideos();
 
-    // 3. Setup Navigation
+    // Activate the home tab silently (no animation on first load)
     const activeBtn = document.querySelector('.nav-item.active');
-    if(activeBtn) setTimeout(() => switchTab(activeBtn, null, true), 100);
+    if (activeBtn) setTimeout(() => switchTab(activeBtn, null, true), 100);
 
-    // 4. Listen to Auth Changes
+    // Listen for auth state changes
     listenToAuthChanges(async (user) => {
-        const navIconDiv = document.getElementById('navAuthIcon'); 
+        const navIconDiv = document.getElementById('navAuthIcon');
         const label = document.getElementById('authLabel');
-        const loginView = document.getElementById('loginContent'); 
+        const loginView = document.getElementById('loginContent');
         const profileView = document.getElementById('profileContent');
 
         if (user) {
-            if(navIconDiv) navIconDiv.innerHTML = `<img src="${user.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="nav-user-img">`;
-            if(label) label.innerText = "Profile";
-            if(loginView) loginView.classList.add('hidden');
-            if(profileView) {
+            if (navIconDiv) navIconDiv.innerHTML = `<img src="${user.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="nav-user-img">`;
+            if (label) label.innerText = "Profile";
+            if (loginView) loginView.classList.add('hidden');
+            if (profileView) {
                 profileView.classList.remove('hidden');
                 document.getElementById('userProfileImg').src = user.photoURL || 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
                 document.getElementById('userName').innerText = user.displayName || "Student";
@@ -153,21 +114,26 @@ const initApp = async () => {
                 findAndPlayVideo(videoId);
             });
         } else {
-            if(navIconDiv) navIconDiv.innerHTML = `<i class="fas fa-user"></i>`;
-            if(label) label.innerText = "Login";
-            if(loginView) loginView.classList.remove('hidden');
-            if(profileView) profileView.classList.add('hidden');
+            if (navIconDiv) navIconDiv.innerHTML = `<i class="fas fa-user"></i>`;
+            if (label) label.innerText = "Login";
+            if (loginView) loginView.classList.remove('hidden');
+            if (profileView) profileView.classList.add('hidden');
         }
-        
+
         renderCourses(user, currentCourseTab);
     });
 
-    // 5. Global Window Bindings for HTML onclicks (if still needed)
+    // Dismiss splash after data is ready
+    hideSplash(1800);
+
+    // ─── Global Window Bindings ──────────────────────────────────────────────
+
     window.switchTab = switchTab;
     window.handleSignOut = handleSignOut;
     window.handleGetStarted = () => handleGetStarted(auth);
     window.closeAuthModal = closeAuthModal;
     window.openAuthModal = openAuthModal;
+
     window.setCourseTab = (tabType, btnElement) => {
         currentCourseTab = tabType;
         document.querySelectorAll('.top-tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -175,15 +141,12 @@ const initApp = async () => {
         renderCourses(auth.currentUser, currentCourseTab);
     };
 
-    // Email/Password Auth
     window.handleEmailSignUp = handleEmailSignUp;
     window.handleEmailSignIn = handleEmailSignIn;
+    window.handleGoogleSignIn = handleGoogleSignIn;
     window.toggleAuthMode = toggleAuthMode;
-
-    // Video Player
     window.findAndPlayVideo = findAndPlayVideo;
 
-    // Wrapper functions to handle form submissions
     window.handleEmailSignUpClick = () => {
         const name = document.getElementById('signUpName').value.trim();
         const email = document.getElementById('signUpEmail').value.trim();
@@ -196,21 +159,23 @@ const initApp = async () => {
         const password = document.getElementById('signInPassword').value;
         handleEmailSignIn(email, password);
     };
-    
-    // PWA
-    window.addEventListener('beforeinstallprompt', (e) => { 
-        e.preventDefault(); 
-        document.getElementById('installBtn').style.display='block'; 
-        window.deferredPrompt = e; 
+
+    // ─── PWA ─────────────────────────────────────────────────────────────────
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        document.getElementById('installBtn').style.display = 'block';
+        window.deferredPrompt = e;
     });
-    window.installApp = async () => { 
-        if(window.deferredPrompt){ 
-            window.deferredPrompt.prompt(); 
-            window.deferredPrompt = null; 
-        } 
+
+    window.installApp = async () => {
+        if (window.deferredPrompt) {
+            window.deferredPrompt.prompt();
+            window.deferredPrompt = null;
+        }
     };
-    
-    if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
 };
 
 document.addEventListener("DOMContentLoaded", initApp);

@@ -9,135 +9,131 @@
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.plyr.io https://cdnjs.cloudflare.com;
         img-src 'self' data: https: http:;
         font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com;
-        connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net https://firestore.googleapis.com;
-        frame-src https://www.youtube.com https://www.youtube-nocookie.com;
+        connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net https://firestore.googleapis.com https://securetoken.googleapis.com https://accounts.google.com;
+        frame-src https://www.youtube.com https://www.youtube-nocookie.com https://accounts.google.com https://kithademic-studies.firebaseapp.com;
         media-src https://www.youtube.com https://*.googlevideo.com;
         worker-src 'self' blob:;
         manifest-src 'self';
     ">
     <title>Kithademic Studies</title>
     <link rel="manifest" href="manifest.json">
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
-
-    <style>
-        .history-container { margin-top: 20px; text-align: left; width: 100%; }
-        
-        .history-list { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px; 
-            max-height: 240px; /* Controls the height before scrolling starts */
-            overflow-y: auto; 
-            padding-right: 8px; 
-        }
-        
-        /* Custom Scrollbar for the History List */
-        .history-list::-webkit-scrollbar { width: 4px; }
-        .history-list::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
-        .history-list::-webkit-scrollbar-thumb { background: var(--accent-gold); border-radius: 10px; }
-
-        .history-card { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            background: rgba(255, 255, 255, 0.03); 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            border-radius: 12px; 
-            padding: 8px; 
-            cursor: pointer; 
-            transition: all 0.3s ease; 
-            position: relative; 
-            overflow: hidden; 
-            flex-shrink: 0; /* THIS FIXES THE BUG! Prevents the card from squishing */
-        }
-        
-        .history-card:hover { 
-            background: rgba(238, 187, 93, 0.1); 
-            border-color: var(--accent-gold); 
-            transform: translateX(5px); 
-        }
-        
-        .history-thumb { 
-            width: 100px; 
-            height: 56px; 
-            border-radius: 8px; 
-            object-fit: cover; 
-            flex-shrink: 0; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
-        }
-        
-        .history-info { 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            overflow: hidden; 
-        }
-        
-        .history-title { 
-            font-size: 0.9rem; 
-            color: #fff; 
-            font-weight: 600; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            margin-bottom: 4px; 
-        }
-        
-        .play-overlay { 
-            position: absolute; 
-            left: 38px; top: 50%; 
-            transform: translate(-50%, -50%); 
-            color: #fff; 
-            font-size: 1.2rem; 
-            opacity: 0; 
-            transition: 0.3s; 
-            text-shadow: 0 2px 5px rgba(0,0,0,0.8); 
-        }
-        
-        .history-card:hover .play-overlay { opacity: 1; }
-        button:hover { opacity: 0.8; }
-    </style>
-
 </head>
 <body>
 
-    <div class="top-brand">
-        <div class="logo" style="display: flex; align-items: center; gap: 10px;">
-            <img src="icon-192.png" alt="Logo" style="width: 35px; border-radius: 5px;">
-            <span style="font-size: 1.2rem; display: none;">Kithademic</span>
+    <!-- ═══════════════ SPLASH SCREEN ═══════════════ -->
+    <div id="splash" class="splash-screen" aria-hidden="true">
+        <div class="splash-geo splash-geo-1"></div>
+        <div class="splash-geo splash-geo-2"></div>
+        <div class="splash-geo splash-geo-3"></div>
+        <div class="splash-particles" id="splashParticles"></div>
+        <div class="splash-content">
+            <div class="splash-logo-wrap">
+                <img src="icon-192.png" alt="Kithademic Logo" class="splash-logo">
+                <div class="splash-ring splash-ring-1"></div>
+                <div class="splash-ring splash-ring-2"></div>
+            </div>
+            <p id="splashTagline" class="splash-tagline arabic-font">بِسْمِ ٱللَّٰهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+            <h1 class="splash-brand">Kithademic Studies</h1>
+            <p class="splash-sub">Excellence in Islamic &amp; Academic Education</p>
+            <div class="splash-loader">
+                <div class="splash-loader-bar"></div>
+            </div>
         </div>
     </div>
 
+    <!-- ═══════════════ TOP BAR ═══════════════ -->
+    <header class="top-brand">
+        <div class="brand-left">
+            <img src="icon-192.png" alt="Logo" class="brand-logo">
+            <span class="brand-name">Kithademic <span>Studies</span></span>
+        </div>
+        <button id="installBtn" onclick="installApp()">
+            <i class="fas fa-download"></i> Install
+        </button>
+    </header>
+
     <div class="parallax-bg"></div>
 
+    <!-- ═══════════════ MAIN APP ═══════════════ -->
     <main id="app">
+
+        <!-- HOME PAGE -->
         <section id="home" class="page active">
-            <div class="hero-content">
-                <img src="icon-512.png" alt="Big Logo" style="width: 120px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 25px;">
-                <h1 class="arabic-font">بِسْمِ ٱللَّٰهِ</h1>
-                <h2>Welcome to <span class="gold-text">Kithademic Studies</span></h2>
-                <p>Knowledge is the light of the heart.<br>Excellence in Islamic & Academic Education.</p>
-                <button class="btn-primary" onclick="handleGetStarted()">Get Started</button>
+            <div class="hero-wrapper">
+                <div class="hero-badge">
+                    <i class="fas fa-star"></i>
+                    Islamic &amp; Academic Excellence
+                </div>
+
+                <div class="hero-logo-wrap">
+                    <img src="icon-512.png" alt="Kithademic Studies" class="hero-logo">
+                </div>
+
+                <h1 class="hero-arabic arabic-font">بِسْمِ ٱللَّٰهِ الرَّحْمَٰنِ الرَّحِيمِ</h1>
+
+                <h2 class="hero-title">
+                    Welcome to<br><span class="hero-brand">Kithademic Studies</span>
+                </h2>
+
+                <p class="hero-sub">
+                    Knowledge is the light of the heart.<br>
+                    Excellence in Islamic &amp; Academic Education.
+                </p>
+
+                <div class="hero-ctas">
+                    <button class="btn-hero-primary" onclick="handleGetStarted()">
+                        <i class="fas fa-rocket" style="margin-right:8px;"></i>Get Started
+                    </button>
+                    <button class="btn-hero-ghost" onclick="switchTab(document.querySelectorAll('.nav-item')[1], 'courses')">
+                        Browse Courses
+                    </button>
+                </div>
+
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <span class="stat-num">500+</span>
+                        <span class="stat-label">Students</span>
+                    </div>
+                    <div class="hero-stat-divider"></div>
+                    <div class="hero-stat">
+                        <span class="stat-num">20+</span>
+                        <span class="stat-label">Courses</span>
+                    </div>
+                    <div class="hero-stat-divider"></div>
+                    <div class="hero-stat">
+                        <span class="stat-num">100%</span>
+                        <span class="stat-label">Online</span>
+                    </div>
+                </div>
             </div>
         </section>
 
+        <!-- COURSES PAGE -->
         <section id="courses" class="page hidden">
-            <h2 class="section-title" style="margin-bottom: 15px;"><span class="gold-text">Our Courses</span></h2>
-            
+            <div class="section-hd">
+                <h2>Our <span class="gold-text">Courses</span></h2>
+                <p>Premium and free courses designed for your spiritual &amp; academic growth</p>
+            </div>
+
             <div class="top-tab-nav">
-                <button class="top-tab-btn active" onclick="setCourseTab('premium', this)">Premium</button>
-                <button class="top-tab-btn" onclick="setCourseTab('free', this)">Free</button>
+                <button class="top-tab-btn active" onclick="setCourseTab('premium', this)">
+                    <i class="fas fa-crown" style="margin-right:6px; font-size:0.7rem;"></i>Premium
+                </button>
+                <button class="top-tab-btn" onclick="setCourseTab('free', this)">
+                    <i class="fas fa-gift" style="margin-right:6px; font-size:0.7rem;"></i>Free
+                </button>
             </div>
 
             <div class="search-container">
                 <div class="search-box">
                     <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="courseSearch" placeholder="Search courses by title or description..." class="search-input">
-                    <button id="clearSearch" class="clear-search-btn hidden" title="Clear search">
+                    <input type="text" id="courseSearch" placeholder="Search courses…" class="search-input">
+                    <button id="clearSearch" class="clear-search-btn hidden" title="Clear">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -146,46 +142,53 @@
             <div class="course-grid" id="courseList"></div>
         </section>
 
+        <!-- VIDEOS PAGE -->
         <section id="videos" class="page hidden">
-            <h2 class="section-title" style="margin-bottom: 25px;"><span class="gold-text">Videos</span></h2>
+            <div class="section-hd">
+                <h2>Free <span class="gold-text">Videos</span></h2>
+                <p>High-quality Islamic talks and academic content — completely free</p>
+            </div>
             <div class="video-grid" id="videoList"></div>
         </section>
 
+        <!-- CLASSROOM PAGE -->
         <section id="classroom" class="page hidden">
-            <div style="width: 95%; max-width: 1300px; margin: 0 auto 15px auto; text-align: left;">
-                <button id="backBtn" 
-                        style="background: transparent; border: 1px solid var(--accent-gold); color: var(--accent-gold); padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+            <div style="width:95%; max-width:1320px; margin:0 auto 14px;">
+                <button id="backBtn">
                     <i class="fas fa-arrow-left"></i> Back
                 </button>
             </div>
-
             <div class="classroom-container">
                 <div class="video-area">
                     <div class="video-wrapper"></div>
                     <h2 id="videoTitle">Select a Class to Start</h2>
                 </div>
-
                 <div class="playlist-area">
                     <div class="playlist-header">
                         <h3>Syllabus</h3>
-                        <span id="progressText" style="color:var(--accent-gold)">Classroom</span>
+                        <span id="progressText" style="color:var(--accent-gold); font-size:0.8rem;">Classroom</span>
                     </div>
                     <div id="playlistItems" class="playlist-items"></div>
                 </div>
             </div>
         </section>
+
     </main>
 
+    <!-- ═══════════════ BOTTOM NAV ═══════════════ -->
     <nav class="bottom-nav">
         <div id="navBubble" class="nav-indicator"></div>
         <a href="#" class="nav-item active" onclick="switchTab(this, 'home')">
-            <i class="fas fa-home"></i> <span class="label">Home</span>
+            <i class="fas fa-home"></i>
+            <span class="label">Home</span>
         </a>
         <a href="#" class="nav-item" onclick="switchTab(this, 'courses')">
-            <i class="fas fa-book-open"></i> <span class="label">Courses</span>
+            <i class="fas fa-book-open"></i>
+            <span class="label">Courses</span>
         </a>
         <a href="#" class="nav-item" onclick="switchTab(this, 'videos')">
-            <i class="fas fa-play-circle"></i> <span class="label">Videos</span>
+            <i class="fas fa-play-circle"></i>
+            <span class="label">Videos</span>
         </a>
         <a href="#" class="nav-item" onclick="switchTab(this, null); openAuthModal()">
             <div id="navAuthIcon" class="icon-container"><i class="fas fa-user"></i></div>
@@ -193,115 +196,157 @@
         </a>
     </nav>
 
+    <!-- ═══════════════ AUTH MODAL ═══════════════ -->
     <div id="authModal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close" onclick="closeAuthModal()" style="float:right; cursor:pointer; font-size:1.5rem;">&times;</span>
+        <div class="modal-content auth-modal-content">
 
-            <!-- LOGIN VIEW -->
-            <div id="loginContent" style="text-align: center; padding-bottom: 10px;">
-                <h2 id="modalTitle" style="margin-bottom: 20px;">Welcome Back</h2>
+            <!-- ── CLOSE ── -->
+            <button class="auth-close-btn" onclick="closeAuthModal()" aria-label="Close">&times;</button>
 
-                <!-- Email/Password Sign In Form -->
-                <div id="signInForm">
+            <!-- ── LOGIN / REGISTER ── -->
+            <div id="loginContent">
+
+                <!-- Header -->
+                <div class="auth-modal-header">
+                    <div class="auth-modal-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h2 id="modalTitle">Welcome Back</h2>
+                    <p id="authSubtitle" class="auth-subtitle">Sign in to continue your learning journey</p>
+                </div>
+
+                <!-- Google Sign-In -->
+                <button id="googleSignInBtn" class="btn-google" onclick="handleGoogleSignIn()">
+                    <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+                        <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+                        <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+                        <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+                    </svg>
+                    <span class="google-btn-text">Continue with Google</span>
+                    <span class="google-btn-spinner"></span>
+                </button>
+
+                <!-- Divider -->
+                <div class="auth-divider"><span>or continue with email</span></div>
+
+                <!-- Sign In Form -->
+                <div id="signInForm" class="auth-form">
                     <div class="auth-input-group">
-                        <input type="email" id="signInEmail" class="auth-input" placeholder="Email Address" required>
+                        <label for="signInEmail">Email Address</label>
+                        <div class="auth-input-wrap">
+                            <i class="fas fa-envelope auth-input-icon"></i>
+                            <input type="email" id="signInEmail" class="auth-input" placeholder="your@email.com" autocomplete="email">
+                        </div>
                     </div>
                     <div class="auth-input-group">
-                        <input type="password" id="signInPassword" class="auth-input" placeholder="Password" required>
+                        <label for="signInPassword">Password</label>
+                        <div class="auth-input-wrap">
+                            <i class="fas fa-lock auth-input-icon"></i>
+                            <input type="password" id="signInPassword" class="auth-input" placeholder="••••••••" autocomplete="current-password">
+                        </div>
                     </div>
-                    <button class="btn-gold" onclick="handleEmailSignInClick()" style="width: 100%; margin-bottom: 15px;">
-                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    <button class="btn-auth-submit" id="signInBtn" onclick="handleEmailSignInClick()">
+                        <span class="btn-text"><i class="fas fa-sign-in-alt" style="margin-right:7px;"></i>Sign In</span>
+                        <span class="btn-spinner"></span>
                     </button>
                 </div>
 
-                <!-- Email/Password Sign Up Form -->
-                <div id="signUpForm" class="hidden">
+                <!-- Sign Up Form -->
+                <div id="signUpForm" class="auth-form hidden">
                     <div class="auth-input-group">
-                        <input type="text" id="signUpName" class="auth-input" placeholder="Display Name" required>
+                        <label for="signUpName">Display Name</label>
+                        <div class="auth-input-wrap">
+                            <i class="fas fa-user auth-input-icon"></i>
+                            <input type="text" id="signUpName" class="auth-input" placeholder="Your full name" autocomplete="name">
+                        </div>
                     </div>
                     <div class="auth-input-group">
-                        <input type="email" id="signUpEmail" class="auth-input" placeholder="Email Address" required>
+                        <label for="signUpEmail">Email Address</label>
+                        <div class="auth-input-wrap">
+                            <i class="fas fa-envelope auth-input-icon"></i>
+                            <input type="email" id="signUpEmail" class="auth-input" placeholder="your@email.com" autocomplete="email">
+                        </div>
                     </div>
                     <div class="auth-input-group">
-                        <input type="password" id="signUpPassword" class="auth-input" placeholder="Password (min 6 characters)" required>
+                        <label for="signUpPassword">Password</label>
+                        <div class="auth-input-wrap">
+                            <i class="fas fa-lock auth-input-icon"></i>
+                            <input type="password" id="signUpPassword" class="auth-input" placeholder="Min. 6 characters" autocomplete="new-password">
+                        </div>
                     </div>
-                    <button class="btn-gold" onclick="handleEmailSignUpClick()" style="width: 100%; margin-bottom: 15px;">
-                        <i class="fas fa-user-plus"></i> Create Account
+                    <button class="btn-auth-submit" id="signUpBtn" onclick="handleEmailSignUpClick()">
+                        <span class="btn-text"><i class="fas fa-user-plus" style="margin-right:7px;"></i>Create Account</span>
+                        <span class="btn-spinner"></span>
                     </button>
                 </div>
 
-                <!-- Mode Toggle -->
-                <p id="authModeToggle" onclick="toggleAuthMode()" style="color:#aaa; font-size: 0.85rem; cursor: pointer;">
+                <!-- Toggle -->
+                <p id="authModeToggle" onclick="toggleAuthMode()">
                     Don't have an account? <span class="auth-link">Sign Up</span>
                 </p>
-            </div>
 
+            </div><!-- /loginContent -->
+
+            <!-- ── PROFILE ── -->
             <div id="profileContent" class="hidden" style="text-align:center;">
                 <img id="userProfileImg" src="" alt="Profile" class="big-profile-img">
-                <h2 id="userName" class="gold-text">Student Name</h2>
-                <p id="userEmail" style="color:#aaa; margin-bottom:15px;">student@gmail.com</p>
+                <h2 id="userName" class="gold-text" style="margin-bottom:4px;">Student Name</h2>
+                <p id="userEmail" style="color:var(--text-tertiary); font-size:0.82rem; margin-bottom:18px;">student@email.com</p>
 
                 <div class="history-container">
-                    <h4 style="color:var(--accent-gold); margin-bottom:10px; font-size: 0.9rem; border-bottom:1px solid rgba(238, 187, 93, 0.2); padding-bottom:5px;">
+                    <h4 style="color:var(--accent-gold); margin-bottom:10px; font-size:0.82rem; display:flex; align-items:center; gap:6px; border-bottom:1px solid rgba(212,168,75,0.15); padding-bottom:8px;">
                         <i class="fas fa-history"></i> Recent Activity
                     </h4>
                     <div id="historyList" class="history-list">
-                        <p style="color:#666; font-size:0.8rem;">Loading history...</p>
+                        <p style="color:#555; font-size:0.8rem;">Loading history…</p>
                     </div>
                 </div>
 
-                <div class="profile-actions" style="display:flex; flex-direction:column; gap:10px; margin-top: 15px;">
-                    <button id="installBtn" class="btn-primary" onclick="installApp()" style="display:none; border-color:var(--accent-gold); color:var(--accent-gold);">
-                        <i class="fas fa-download"></i> Install App
+                <div style="margin-top:18px;">
+                    <button class="btn-auth-submit" onclick="handleSignOut()"
+                        style="background:transparent; border:1px solid rgba(255,80,80,0.3); color:#ff6b6b; box-shadow:none;">
+                        <span class="btn-text"><i class="fas fa-sign-out-alt" style="margin-right:7px;"></i>Log Out</span>
+                        <span class="btn-spinner" style="border-top-color:#ff6b6b;"></span>
                     </button>
-                    <button class="btn-primary" onclick="handleSignOut()" style="width:100%; border-color:#ff4444; color:#ff4444;">Log Out</button>
                 </div>
             </div>
+
+        </div><!-- /modal-content -->
+    </div>
+
+    <!-- ═══════════════ CUSTOM DIALOG ═══════════════ -->
+    <div id="customDialog" class="modal hidden" style="z-index:3000;">
+        <div class="modal-content" style="text-align:center; padding:32px 28px;">
+            <h2 id="dialogTitle" class="gold-text" style="margin-bottom:12px;">Notice</h2>
+            <p id="dialogMessage" style="color:var(--text-secondary); margin-bottom:28px; font-size:0.92rem; line-height:1.6;"></p>
+            <div id="dialogButtons" style="display:flex; gap:10px; justify-content:center;"></div>
         </div>
     </div>
 
-    <div id="customDialog" class="modal hidden" style="z-index: 3000;">
-        <div class="modal-content" style="text-align: center; padding: 30px;">
-            <h2 id="dialogTitle" class="gold-text" style="margin-bottom: 15px;">Notice</h2>
-            <p id="dialogMessage" style="color: #ddd; margin-bottom: 25px; font-size: 0.95rem;"></p>
-            <div id="dialogButtons" style="display: flex; gap: 10px; justify-content: center;">
-            </div>
-        </div>
-    </div>
-
+    <!-- ═══════════════ SCRIPTS ═══════════════ -->
     <script>
-        // Handle Enter key in auth forms
         document.addEventListener('DOMContentLoaded', () => {
-            // Sign In form
-            const signInEmail = document.getElementById('signInEmail');
-            const signInPassword = document.getElementById('signInPassword');
-
-            [signInEmail, signInPassword].forEach(input => {
-                if (input) {
-                    input.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleEmailSignInClick();
-                        }
-                    });
-                }
+            // Enter key for sign-in
+            ['signInEmail','signInPassword'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); handleEmailSignInClick(); } });
             });
-
-            // Sign Up form
-            const signUpName = document.getElementById('signUpName');
-            const signUpEmail = document.getElementById('signUpEmail');
-            const signUpPassword = document.getElementById('signUpPassword');
-
-            [signUpName, signUpEmail, signUpPassword].forEach(input => {
-                if (input) {
-                    input.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleEmailSignUpClick();
-                        }
-                    });
-                }
+            // Enter key for sign-up
+            ['signUpName','signUpEmail','signUpPassword'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); handleEmailSignUpClick(); } });
             });
+            // Spawn splash particles
+            const container = document.getElementById('splashParticles');
+            if (container) {
+                for (let i = 0; i < 32; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'splash-particle';
+                    p.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*3.5}s;animation-duration:${3.5+Math.random()*4}s;width:${1.5+Math.random()*3.5}px;height:${1.5+Math.random()*3.5}px;opacity:${0.15+Math.random()*0.5}`;
+                    container.appendChild(p);
+                }
+            }
         });
     </script>
     <script src="config.js"></script>

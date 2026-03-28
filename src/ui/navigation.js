@@ -1,11 +1,12 @@
 // Page & Tab Navigation Logic
 import { closeAuthModal } from "../auth/auth-manager.js";
 import { destroyPlayer } from "./player.js";
+import { animatedShowPage } from "../animations.js";
 
 let lastViewedPage = 'courses';
 
 /**
- * Switches active tab and displays corresponding page
+ * Switches active tab and displays corresponding page with animation.
  * @param {HTMLElement} element - Tab element to activate
  * @param {string} pageId - Page ID to display
  * @param {boolean} initialization - True if called during initialization
@@ -14,32 +15,39 @@ export const switchTab = (element, pageId, initialization = false) => {
     if (pageId !== 'classroom' && !initialization) killVideo();
     if (pageId === 'courses' || pageId === 'videos') lastViewedPage = pageId;
 
-    if(pageId) showPage(pageId);
-    if (element) {
-        const bubble = document.getElementById('navBubble');
-        if(bubble) {
-            bubble.style.width = `${element.offsetWidth}px`;
-            bubble.style.transform = `translateX(${element.offsetLeft}px)`;
-            bubble.classList.add('initialized');
+    if (pageId) {
+        if (initialization) {
+            showPage(pageId);
+        } else {
+            animatedShowPage(pageId);
         }
+    }
+
+    if (element) {
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         element.classList.add('active');
     }
 };
 
 /**
- * Shows specified page and hides all others
+ * Shows specified page instantly (no animation — used for init).
  * @param {string} pageId - Page ID to display
  */
 export const showPage = (pageId) => {
-    document.querySelectorAll('.page').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.page').forEach(el => {
+        el.classList.add('hidden');
+        el.classList.remove('active', 'page-enter', 'page-exit');
+    });
     const target = document.getElementById(pageId);
-    if(target) target.classList.remove('hidden');
+    if (target) {
+        target.classList.remove('hidden');
+        target.classList.add('active');
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 /**
- * Sets up the back button functionality in classroom view
+ * Sets up the back button functionality in classroom view.
  */
 export const setupBackButton = () => {
     const backBtn = document.getElementById('backBtn');
@@ -53,7 +61,7 @@ export const setupBackButton = () => {
 };
 
 /**
- * Destroys video player and resets video wrapper
+ * Destroys video player and resets video wrapper.
  */
 export const killVideo = () => {
     destroyPlayer();
@@ -64,7 +72,7 @@ export const killVideo = () => {
 };
 
 /**
- * Handles "Get Started" button click
+ * Handles "Get Started" button click.
  * @param {Object} auth - Firebase auth instance
  */
 export const handleGetStarted = (auth) => {
@@ -76,12 +84,19 @@ export const handleGetStarted = (auth) => {
 };
 
 /**
- * Opens the authentication modal
+ * Opens the authentication modal.
  */
-export const openAuthModal = () => document.getElementById('authModal').classList.remove('hidden');
+export const openAuthModal = () => {
+    const modal = document.getElementById('authModal');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => modal.classList.add('modal-visible'));
+    });
+};
 
 /**
- * Closes auth modal and returns to home page
+ * Closes the authentication modal.
  */
 export const closeAuthModalWrapper = () => {
     closeAuthModal();
